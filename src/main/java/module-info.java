@@ -5,4 +5,6 @@ module musicshelf {
     requires javafx.fxml;
 
     exports io.github.rednesto.musicshelf;
+    exports io.github.rednesto.musicshelf.ui;
+    exports io.github.rednesto.musicshelf.ui.scenes;
 }

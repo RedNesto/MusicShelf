@@ -9,6 +9,5 @@ object MusicShelfBundle {
         return ResourceBundle.getBundle("/lang/musicshelf")
     }
 
-
     fun get(@PropertyKey(resourceBundle = "lang.musicshelf") key: String): String = getBundle().getString(key)
 }

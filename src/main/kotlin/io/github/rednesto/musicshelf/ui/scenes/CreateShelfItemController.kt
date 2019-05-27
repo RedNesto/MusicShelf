@@ -102,12 +102,17 @@ class CreateShelfItemController : Initializable {
         infoKeyColumn.cellFactory = TextFieldTableCell.forTableColumn()
         infoKeyColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.first) }
         infoKeyColumn.setOnEditCommit { event ->
-            val key = changeInfoKeyIfNeeded(event.newValue)
-            itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(first = key)
+            val newKey = event.newValue
+            if (newKey != event.oldValue) {
+                val key = changeInfoKeyIfNeeded(newKey)
+                itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(first = key)
+            }
         }
         infoValueColumn.cellFactory = TextFieldTableCell.forTableColumn()
         infoValueColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.second) }
-        infoValueColumn.setOnEditCommit { event -> itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(second = event.newValue) }
+        infoValueColumn.setOnEditCommit { event ->
+            itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(second = event.newValue)
+        }
 
         itemInfoTableView.items.addAll(ShelfItemInfoKeys.DEFAULT_VALUES.toList())
     }
@@ -122,9 +127,11 @@ class CreateShelfItemController : Initializable {
             val builder = StringBuilder()
             for (i in key.length - 1 downTo 0) {
                 val char = key[i]
-                if (char.isDigit()) {
-                    builder.insert(0, char)
+                if (!char.isDigit()) {
+                    break
                 }
+
+                builder.insert(0, char)
             }
 
             return builder.toString().toInt()

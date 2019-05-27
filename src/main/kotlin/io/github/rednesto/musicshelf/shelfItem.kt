@@ -12,6 +12,10 @@ object ShelfItemInfoKeys {
     const val NAME = "name"
 
     val ALL: List<String> = listOf(NAME)
+
+    val DEFAULT_VALUES: Map<String, String> = mapOf(
+            NAME to "A new item"
+    )
 }
 
 class ShelfItemInfoDelegate(private val infoKey: String) {

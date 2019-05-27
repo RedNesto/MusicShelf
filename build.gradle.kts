@@ -17,6 +17,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains:annotations:17.0.0")
 }
 
 tasks.withType<KotlinCompile> {

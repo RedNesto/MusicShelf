@@ -1,17 +1,22 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.MusicShelf
+import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ui.ShelfItemCell
+import io.github.rednesto.musicshelf.utils.loadFxml
 import io.github.rednesto.musicshelf.utils.within
 import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionMode
+import javafx.stage.Modality
+import javafx.stage.Stage
 import javafx.stage.Window
 import javafx.stage.WindowEvent
 import java.net.URL
@@ -27,7 +32,13 @@ class MainShelfController : Initializable {
 
     @FXML
     fun addShelfItemButton_onAction(event: ActionEvent) {
-        // TODO
+        val dialog = Stage().apply {
+            scene = Scene(loadFxml<Parent>("/ui/scenes/CreateShelfItem.fxml", resources = MusicShelfBundle.getBundle()))
+            title = MusicShelfBundle.get("create.shelf_item.window_title")
+            initModality(Modality.APPLICATION_MODAL)
+        }
+
+        dialog.showAndWait()
     }
 
     @FXML

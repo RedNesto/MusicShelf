@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<GridPane hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="550.0" vgap="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="NEVER" />
+    <ColumnConstraints hgrow="SOMETIMES" />
+    <ColumnConstraints hgrow="NEVER" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="ALWAYS" />
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints />
+  </rowConstraints>
+  <padding>
+    <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
+  </padding>
+  <TextField fx:id="filePathTextField" GridPane.columnIndex="1" />
+  <Label labelFor="$filePathTextField" mnemonicParsing="true" text="%create.shelf_item.file_path" />
+  <Button onAction="#selectFileButton_onAction" text="%create.shelf_item.select_file.button" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
+  <HBox spacing="10.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
+    <Button onAction="#addInfoButton_onAction" text="%create.shelf_item.info.add" />
+    <Button onAction="#removeInfoButton_onAction" text="%create.shelf_item.info.remove" />
+    <GridPane.margin>
+      <Insets top="-5.0" />
+    </GridPane.margin>
+  </HBox>
+  <TableView fx:id="itemInfoTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
+    <columns>
+      <TableColumn fx:id="infoKeyColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="75.0" text="Key" />
+      <TableColumn fx:id="infoValueColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="175.0" text="Value" />
+    </columns>
+    <placeholder>
+      <Text text="%create.shelf_item.info.placeholder" />
+    </placeholder>
+  </TableView>
+  <Label labelFor="$itemInfoTableView" mnemonicParsing="true" text="%create.shelf_item.info" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+    <GridPane.margin>
+      <Insets bottom="-5.0" />
+    </GridPane.margin>
+  </Label>
+  <ButtonBar GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4">
+    <buttons>
+      <Button mnemonicParsing="false" onAction="#cancelButton_onAction" text="%create.shelf_item.cancel" ButtonBar.buttonData="CANCEL_CLOSE" />
+      <Button fx:id="createButton" defaultButton="true" onAction="#createButton_onAction" text="%create.shelf_item.create" ButtonBar.buttonData="FINISH" />
+    </buttons>
+    <GridPane.margin>
+      <Insets top="7.0" />
+    </GridPane.margin>
+  </ButtonBar>
+</GridPane>

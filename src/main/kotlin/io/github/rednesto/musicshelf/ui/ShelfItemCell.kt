@@ -1,5 +1,6 @@
 package io.github.rednesto.musicshelf.ui
 
+import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.name
 import io.github.rednesto.musicshelf.utils.loadFxml
@@ -34,7 +35,7 @@ class ShelfItemCell : ListCell<ShelfItem>() {
         lateinit var path: Text
 
         fun update(item: ShelfItem) {
-            name.text = item.name ?: "<Unnamed>"
+            name.text = item.name ?: MusicShelfBundle.get("shelf.item.unnamed")
             path.text = item.path.toAbsolutePath().toString()
         }
     }

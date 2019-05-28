@@ -3,6 +3,12 @@ module musicshelf {
 
     requires javafx.controls;
     requires javafx.fxml;
+
+    requires configurate.core;
+    requires configurate.xml;
+
+    requires guava;
+
     requires org.jetbrains.annotations;
 
     exports io.github.rednesto.musicshelf;

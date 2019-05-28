@@ -13,11 +13,16 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+     maven {
+        name = "sponge"
+        url = uri("https://repo.spongepowered.org/maven")
+    }
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains:annotations:17.0.0")
+    implementation("org.spongepowered:configurate-xml:3.6")
 }
 
 tasks.withType<KotlinCompile> {

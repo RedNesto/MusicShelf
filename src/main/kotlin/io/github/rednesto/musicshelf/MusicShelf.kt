@@ -1,5 +1,7 @@
 package io.github.rednesto.musicshelf
 
+import io.github.rednesto.musicshelf.serialization.ShelfItemStorage
+import java.nio.file.Path
 import java.util.*
 
 object MusicShelf {
@@ -35,6 +37,16 @@ object MusicShelf {
 
     fun removeChangeListener(listener: ChangeListener) {
         changeListeners.remove(listener)
+    }
+
+    fun load(filePath: Path = ShelfItemStorage.DEFAULT_FILE_PATH) {
+        val loadedItems = ShelfItemStorage.load(filePath).associateBy(ShelfItem::id)
+        items.clear()
+        items.putAll(loadedItems)
+    }
+
+    fun save(filePath: Path = ShelfItemStorage.DEFAULT_FILE_PATH) {
+        ShelfItemStorage.save(items.values.toList(), filePath)
     }
 
     interface ChangeListener {

@@ -4,6 +4,7 @@ import io.github.rednesto.musicshelf.MusicShelf
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ui.ShelfItemCell
+import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.loadFxml
 import io.github.rednesto.musicshelf.utils.within
 import javafx.beans.value.ObservableValue
@@ -15,6 +16,7 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionMode
+import javafx.scene.input.*
 import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.Window
@@ -42,6 +44,16 @@ class MainShelfController : Initializable {
     }
 
     @FXML
+    fun shelfListView_onMouseClicked(event: MouseEvent) {
+        if (event.button == MouseButton.PRIMARY && event.clickCount >= 2) {
+            val selectedItem = shelfListView.selectionModel.selectedItem
+            if (selectedItem != null) {
+                DesktopHelper.open(selectedItem.path)
+            }
+        }
+    }
+
+    @FXML
     lateinit var removeShelfItemButton: Button
 
     @FXML
@@ -58,11 +70,24 @@ class MainShelfController : Initializable {
         shelfListView.items.addAll(MusicShelf.getAllItems())
     }
 
+    private val shortcuts: Map<KeyCombination, Runnable> = mapOf(
+            KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_ANY) to Runnable {
+                shelfListView.selectionModel.selectedItems.forEach { DesktopHelper.open(it.path) }
+            }
+    )
+
     private val shelfChangeListener = MusicShelfChangeListener()
 
     private fun onSceneChange(observable: ObservableValue<out Scene>, oldScene: Scene?, newScene: Scene?) {
-        oldScene?.windowProperty()?.removeListener(::onWindowChange)
-        newScene?.windowProperty()?.addListener(::onWindowChange)
+        if (oldScene != null) {
+            oldScene.windowProperty().removeListener(::onWindowChange)
+            shortcuts.keys.forEach { oldScene.accelerators.remove(it) }
+        }
+
+        if (newScene != null) {
+            newScene.windowProperty().addListener(::onWindowChange)
+            newScene.accelerators.putAll(shortcuts)
+        }
     }
 
     private fun onWindowChange(observable: ObservableValue<out Window>, oldWindow: Window?, newWindow: Window?) {

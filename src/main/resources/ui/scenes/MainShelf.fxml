@@ -17,7 +17,7 @@
     <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
     <RowConstraints vgrow="NEVER" />
   </rowConstraints>
-  <ListView fx:id="shelfListView">
+  <ListView fx:id="shelfListView" onMouseClicked="#shelfListView_onMouseClicked">
     <placeholder>
       <Hyperlink onAction="#addShelfItemButton_onAction" text="%shelf.placeholder" />
     </placeholder>

@@ -14,8 +14,11 @@ class MusicShelfApp : Application() {
     }
 
     override fun start(primaryStage: Stage) {
-        primaryStage.scene = Scene(loadFxml("/ui/scenes/MainShelf.fxml", resources = MusicShelfBundle.getBundle()))
-        primaryStage.show()
+        primaryStage.apply {
+            title = "MusicShelf"
+            scene = Scene(loadFxml("/ui/scenes/MainShelf.fxml", resources = MusicShelfBundle.getBundle()))
+            show()
+        }
     }
 
     override fun stop() {

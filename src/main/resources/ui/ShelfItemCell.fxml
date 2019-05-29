@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.MenuItem?>
 
 <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
@@ -19,4 +19,12 @@
   </padding>
   <Text fx:id="name" strokeType="OUTSIDE" strokeWidth="0.0" />
   <Text fx:id="path" layoutX="15.0" layoutY="28.0" strokeType="OUTSIDE" strokeWidth="0.0" GridPane.rowIndex="1" />
+  <fx:define>
+    <ContextMenu fx:id="paneContextMenu">
+      <items>
+        <MenuItem text="%shelf.item.open" onAction="#openMenuItem_onAction" />
+        <MenuItem text="%shelf.item.show_details" onAction="#showDetailsMenuItem_onAction" />
+      </items>
+    </ContextMenu>
+  </fx:define>
 </GridPane>

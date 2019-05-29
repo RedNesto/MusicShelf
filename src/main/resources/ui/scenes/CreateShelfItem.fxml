@@ -30,12 +30,12 @@
     <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
   </padding>
   <TextField fx:id="filePathTextField" GridPane.columnIndex="1" />
-  <Label labelFor="$filePathTextField" mnemonicParsing="true" text="%create.shelf_item.file_path" />
+  <Label labelFor="$filePathTextField" mnemonicParsing="true" text="%shelf_item.file_path" />
   <Button onAction="#selectFileButton_onAction" text="%create.shelf_item.select_file.button" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
   <TableView fx:id="itemInfoTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
     <columns>
-      <TableColumn fx:id="infoKeyColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="75.0" text="Key" />
-      <TableColumn fx:id="infoValueColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="175.0" text="Value" />
+      <TableColumn fx:id="infoKeyColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="75.0" text="%shelf_item.info.key" />
+      <TableColumn fx:id="infoValueColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="175.0" text="%shelf_item.info.value" />
     </columns>
     <placeholder>
       <Text text="%create.shelf_item.info.placeholder" />
@@ -48,7 +48,7 @@
       <Insets top="-5.0" />
     </GridPane.margin>
   </HBox>
-  <Label labelFor="$itemInfoTableView" mnemonicParsing="true" text="%create.shelf_item.info" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+  <Label labelFor="$itemInfoTableView" mnemonicParsing="true" text="%shelf_item.info" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
     <GridPane.margin>
       <Insets bottom="-5.0" />
     </GridPane.margin>

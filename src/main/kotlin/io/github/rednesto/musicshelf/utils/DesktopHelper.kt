@@ -8,6 +8,16 @@ object DesktopHelper {
         desktop.open(filePath.toFile())
     }
 
+    fun show(filePath: Path) = this { desktop: Desktop ->
+        val absolutePath = filePath.toAbsolutePath().toString()
+        when {
+            OsInfo.IS_WINDOWS -> Runtime.getRuntime().exec("explorer /select,\"$absolutePath\"")
+            OsInfo.IS_MACOS -> Runtime.getRuntime().exec(arrayOf("open", "-R", absolutePath))
+        }
+    }
+
+    fun supportsShow(): Boolean = OsInfo.IS_WINDOWS || OsInfo.IS_MACOS
+
     operator fun invoke(action: (desktop :Desktop) -> Unit) {
         if (Desktop.isDesktopSupported()) {
             action(Desktop.getDesktop())

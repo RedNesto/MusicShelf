@@ -7,6 +7,8 @@ import kotlin.reflect.KProperty
 data class ShelfItem(val id: UUID, val path: Path, val infos: MutableMap<String, String>)
 
 var ShelfItem.name: String? by ShelfItemInfoDelegate(ShelfItemInfoKeys.NAME)
+val ShelfItem.nameOrUnnamed: String
+    get() = this.name ?: MusicShelfBundle.get("shelf.item.unnamed")
 
 object ShelfItemInfoKeys {
     const val NAME = "name"

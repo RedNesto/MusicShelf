@@ -6,6 +6,7 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
 import ninja.leaping.configurate.xml.XMLConfigurationLoader
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.streams.toList
 
 object ShelfItemStorage {
 
@@ -14,7 +15,12 @@ object ShelfItemStorage {
     fun load(filePath: Path = DEFAULT_FILE_PATH): List<ShelfItem> {
         val configLoader = createLoader(filePath)
         val loadedNode = configLoader.load()
-        return loadedNode.getValue(TypeTokens.SHELF_ITEM_LIST) ?: emptyList()
+        val loadedList = loadedNode.getValue(TypeTokens.SHELF_ITEM_LIST)
+        return if (loadedList != null) {
+            // Configurate puts a null in the list if the file contains no items.
+            // To avoid this issue and any other NPE we remove all nulls from the list
+            loadedList.stream().filter { it != null }.toList()
+        } else emptyList()
     }
 
     fun save(items: List<ShelfItem>, filePath: Path = DEFAULT_FILE_PATH) {

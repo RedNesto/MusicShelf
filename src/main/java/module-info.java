@@ -1,5 +1,6 @@
 module musicshelf {
     requires kotlin.stdlib;
+    requires kotlin.stdlib.jdk8;
 
     requires java.desktop;
 

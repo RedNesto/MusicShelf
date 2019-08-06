@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.openjfx.gradle.JavaFXOptions
 
 plugins {
-    kotlin("jvm") version "1.3.30"
+    kotlin("jvm") version "1.3.41"
 
-    id("org.openjfx.javafxplugin") version "0.0.7"
-    id("org.beryx.jlink") version "2.10.2"
+    id("org.openjfx.javafxplugin") version "0.0.8"
+    id("org.beryx.jlink") version "2.14.0"
 }
 
 group = "io.github.rednesto"

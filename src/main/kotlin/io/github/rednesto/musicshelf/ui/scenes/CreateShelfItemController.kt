@@ -82,7 +82,7 @@ class CreateShelfItemController : Initializable {
             return
         }
 
-        MusicShelf.addItem(ShelfItem(UUID.randomUUID(), itemPath, itemInfoTableView.items.toMap(mutableMapOf())))
+        MusicShelf.addItem(ShelfItem(UUID.randomUUID(), itemPath, itemInfoTableView.items.toMap(mutableMapOf()), mutableListOf("test group")))
 
         filePathTextField.scene.window.hide()
     }

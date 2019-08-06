@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -17,11 +17,8 @@
     <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
     <RowConstraints vgrow="NEVER" />
   </rowConstraints>
-  <ListView fx:id="shelfListView" onMouseClicked="#shelfListView_onMouseClicked">
-    <placeholder>
-      <Hyperlink onAction="#addShelfItemButton_onAction" text="%shelf.placeholder" />
-    </placeholder>
-  </ListView>
+  <TreeView fx:id="shelfTreeView" onMouseClicked="#shelfTreeView_onMouseClicked" showRoot="false" />
+  <Hyperlink fx:id="emptyShelfPlaceholderHyperlink" onAction="#addShelfItemButton_onAction" text="%shelf.placeholder" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
   <ButtonBar maxWidth="1.7976931348623157E308" GridPane.rowIndex="1">
     <buttons>
       <Button fx:id="removeShelfItemButton" mnemonicParsing="false" onAction="#removeShelfItemButton_onAction" text="%shelf.item.remove" />

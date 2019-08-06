@@ -12,30 +12,40 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.ContextMenu
-import javafx.scene.control.ListCell
+import javafx.scene.control.TreeCell
 import javafx.scene.text.Text
 import javafx.stage.Modality
 import javafx.stage.Stage
 
-class ShelfItemCell : ListCell<ShelfItem>() {
+class ShelfTreeCell : TreeCell<Any>() {
 
     val controller = ShelfItemController()
 
     val node: Node = loadFxml("/ui/ShelfItemCell.fxml", controller, MusicShelfBundle.getBundle())
 
-    override fun updateItem(item: ShelfItem?, empty: Boolean) {
+    override fun updateItem(item: Any?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
             text = null
             graphic = null
         } else {
-            graphic = node
-            controller.update(item)
+            when (item) {
+                is String -> text = item
+                is ShelfItem -> {
+                    graphic = node
+                    controller.update(item)
+                }
+                else -> {
+                    // TODO log/report this, we should never reach this branch
+                }
+            }
         }
     }
 
     inner class ShelfItemController {
+        lateinit var item: ShelfItem
+
         @FXML
         lateinit var name: Text
 
@@ -61,6 +71,7 @@ class ShelfItemCell : ListCell<ShelfItem>() {
         }
 
         fun update(item: ShelfItem) {
+            this.item = item
             name.text = item.nameOrUnnamed
             path.text = item.path.toAbsolutePath().toString()
             node.setOnContextMenuRequested { paneContextMenu.show(node, it.screenX, it.screenY) }

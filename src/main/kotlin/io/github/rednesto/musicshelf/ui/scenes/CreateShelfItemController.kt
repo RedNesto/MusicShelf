@@ -33,6 +33,15 @@ class CreateShelfItemController : Initializable {
 
         val selectedFile = chooser.showOpenDialog(null) ?: return
         filePathTextField.text = selectedFile.absolutePath
+        val defaultNameValue = ShelfItemInfoKeys.DEFAULT_VALUES[ShelfItemInfoKeys.NAME]
+                ?: error("There should always be a default item name")
+        itemInfoTableView.items.replaceAll { pair ->
+            if (pair.first == ShelfItemInfoKeys.NAME && pair.second == defaultNameValue) {
+                return@replaceAll Pair(pair.first, selectedFile.nameWithoutExtension)
+            }
+
+            return@replaceAll pair
+        }
     }
 
     @FXML

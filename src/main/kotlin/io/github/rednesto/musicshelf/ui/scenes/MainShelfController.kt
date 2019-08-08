@@ -6,7 +6,6 @@ import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.loadFxml
-import io.github.rednesto.musicshelf.utils.within
 import javafx.beans.value.ObservableValue
 import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
@@ -69,7 +68,11 @@ class MainShelfController : Initializable {
         shelfTreeView.setCellFactory { ShelfTreeCell() }
         shelfTreeView.sceneProperty().addListener(::onSceneChange)
         MusicShelf.addChangeListener(shelfChangeListener)
-        shelfTreeView.root = TreeItem<Any>().apply {
+        shelfTreeView.root = createShelfTreeViewRoot()
+    }
+
+    private fun createShelfTreeViewRoot(): TreeItem<Any> {
+        return TreeItem<Any>().apply {
             children.addListener(ListChangeListener {
                 emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty()
             })
@@ -179,20 +182,15 @@ class MainShelfController : Initializable {
 
     private inner class MusicShelfChangeListener : MusicShelf.ChangeListener {
         override fun onItemAdded(added: ShelfItem) {
-            shelfTreeView.root.children.add(TreeItem(added))
+            shelfTreeView.root = createShelfTreeViewRoot()
         }
 
         override fun onItemRemoved(removed: ShelfItem) {
-            shelfTreeView.root.children.removeAll { it.value == removed }
+            shelfTreeView.root = createShelfTreeViewRoot()
         }
 
         override fun onItemReplaced(oldItem: ShelfItem, newItem: ShelfItem) {
-            val oldItemIndex = shelfTreeView.root.children.indexOfFirst { it.value == oldItem }
-            if (oldItemIndex within shelfTreeView.root.children) {
-                shelfTreeView.root.children[oldItemIndex] = TreeItem(newItem)
-            } else {
-                shelfTreeView.root.children.add(TreeItem(newItem))
-            }
+            shelfTreeView.root = createShelfTreeViewRoot()
         }
     }
 }

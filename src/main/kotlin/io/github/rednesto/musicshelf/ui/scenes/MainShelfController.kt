@@ -180,16 +180,8 @@ class MainShelfController : Initializable {
         MusicShelf.removeChangeListener(shelfChangeListener)
     }
 
-    private inner class MusicShelfChangeListener : MusicShelf.ChangeListener {
-        override fun onItemAdded(added: ShelfItem) {
-            shelfTreeView.root = createShelfTreeViewRoot()
-        }
-
-        override fun onItemRemoved(removed: ShelfItem) {
-            shelfTreeView.root = createShelfTreeViewRoot()
-        }
-
-        override fun onItemReplaced(oldItem: ShelfItem, newItem: ShelfItem) {
+    private inner class MusicShelfChangeListener : MusicShelf.SimpleChangeListener {
+        override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
             shelfTreeView.root = createShelfTreeViewRoot()
         }
     }

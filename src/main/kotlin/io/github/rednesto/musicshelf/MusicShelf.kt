@@ -56,4 +56,20 @@ object MusicShelf {
 
         fun onItemReplaced(oldItem: ShelfItem, newItem: ShelfItem) = Unit
     }
+
+    interface SimpleChangeListener : ChangeListener {
+        override fun onItemAdded(added: ShelfItem) {
+            onItemChange(null, added)
+        }
+
+        override fun onItemRemoved(removed: ShelfItem) {
+            onItemChange(removed, null)
+        }
+
+        override fun onItemReplaced(oldItem: ShelfItem, newItem: ShelfItem) {
+            onItemChange(oldItem, newItem)
+        }
+
+        fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) = Unit
+    }
 }

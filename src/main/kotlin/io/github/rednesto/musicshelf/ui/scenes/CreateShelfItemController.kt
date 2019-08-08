@@ -26,7 +26,7 @@ class CreateShelfItemController : Initializable {
     lateinit var filePathTextField: TextField
 
     @FXML
-    fun selectFileButton_onAction(event: ActionEvent) {
+    fun selectFileButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val chooser = FileChooser().apply {
             title = MusicShelfBundle.get("create.shelf_item.select_file.title")
         }
@@ -64,14 +64,14 @@ class CreateShelfItemController : Initializable {
     lateinit var infoValueColumn: TableColumn<Pair<String, String>, String>
 
     @FXML
-    fun addInfoButton_onAction(event: ActionEvent) {
+    fun addInfoButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val key = changeInfoKeyIfNeeded(MusicShelfBundle.get("create.shelf_item.info.default_key"), infoKeys())
         val value = MusicShelfBundle.get("create.shelf_item.info.default_value")
         itemInfoTableView.items.add(key to value)
     }
 
     @FXML
-    fun removeInfoButton_onAction(event: ActionEvent) {
+    fun removeInfoButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         itemInfoTableView.items.removeAll(itemInfoTableView.selectionModel.selectedItems)
     }
 
@@ -89,14 +89,14 @@ class CreateShelfItemController : Initializable {
     }
 
     @FXML
-    fun addGroupButton_onAction(event: ActionEvent) {
+    fun addGroupButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val groupName = changeInfoKeyIfNeeded(MusicShelfBundle.get("create.shelf_item.group.default_name"), itemGroupsListView.items)
         itemGroupsListView.items.add(groupName)
         itemGroupsListView.scrollTo(groupName)
     }
 
     @FXML
-    fun removeGroupButton_onAction(event: ActionEvent) {
+    fun removeGroupButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         itemGroupsListView.items.removeAll(itemGroupsListView.selectionModel.selectedItems)
     }
 
@@ -104,7 +104,7 @@ class CreateShelfItemController : Initializable {
     lateinit var createButton: Button
 
     @FXML
-    fun createButton_onAction(event: ActionEvent) {
+    fun createButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         if (filePathTextField.text.isNullOrBlank()) {
             Alert(Alert.AlertType.ERROR, MusicShelfBundle.get("create.shelf_item.error.no_path"), ButtonType.OK).apply {
                 title = MusicShelfBundle.get("create.shelf_item.error.no_path.title")
@@ -136,12 +136,12 @@ class CreateShelfItemController : Initializable {
     }
 
     @FXML
-    fun cancelButton_onAction(event: ActionEvent) {
+    fun cancelButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         filePathTextField.scene.window.hide()
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        filePathTextField.textProperty().addListener { observable, oldValue, newValue ->
+        filePathTextField.textProperty().addListener { _, _, newValue ->
             createButton.isDisable = newValue.isNullOrBlank()
         }
 

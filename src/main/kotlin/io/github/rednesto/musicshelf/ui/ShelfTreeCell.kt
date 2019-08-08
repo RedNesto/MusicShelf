@@ -56,12 +56,12 @@ class ShelfTreeCell : TreeCell<Any>() {
         lateinit var paneContextMenu: ContextMenu
 
         @FXML
-        fun openMenuItem_onAction(event: ActionEvent) {
+        fun openMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
             DesktopHelper.open(item.path)
         }
 
         @FXML
-        fun showDetailsMenuItem_onAction(event: ActionEvent) {
+        fun showDetailsMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
             Stage().apply {
                 title = MusicShelfBundle.get("shelf_item.details.window_title", item.nameOrUnnamed)
                 scene = Scene(loadFxml<Parent>("/ui/scenes/ShelfItemDetails.fxml", ShelfItemDetailsController(item), MusicShelfBundle.getBundle()))

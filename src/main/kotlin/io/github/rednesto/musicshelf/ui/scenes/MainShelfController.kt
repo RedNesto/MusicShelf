@@ -34,7 +34,7 @@ class MainShelfController : Initializable {
     lateinit var addShelfItemButton: Button
 
     @FXML
-    fun addShelfItemButton_onAction(event: ActionEvent) {
+    fun addShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val dialog = Stage().apply {
             scene = Scene(loadFxml<Parent>("/ui/scenes/CreateShelfItem.fxml", resources = MusicShelfBundle.getBundle()))
             title = MusicShelfBundle.get("create.shelf_item.window_title")
@@ -58,7 +58,7 @@ class MainShelfController : Initializable {
     lateinit var removeShelfItemButton: Button
 
     @FXML
-    fun removeShelfItemButton_onAction(event: ActionEvent) {
+    fun removeShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val selectedItemsIds = shelfTreeView.selectionModel.selectedItems.mapNotNull { (it.value as? ShelfItem)?.id }
         selectedItemsIds.forEach { MusicShelf.removeItem(it) }
     }
@@ -158,7 +158,7 @@ class MainShelfController : Initializable {
 
     private val shelfChangeListener = MusicShelfChangeListener()
 
-    private fun onSceneChange(observable: ObservableValue<out Scene>, oldScene: Scene?, newScene: Scene?) {
+    private fun onSceneChange(@Suppress("UNUSED_PARAMETER") observable: ObservableValue<out Scene>, oldScene: Scene?, newScene: Scene?) {
         if (oldScene != null) {
             oldScene.windowProperty().removeListener(::onWindowChange)
             shortcuts.keys.forEach { oldScene.accelerators.remove(it) }
@@ -170,12 +170,12 @@ class MainShelfController : Initializable {
         }
     }
 
-    private fun onWindowChange(observable: ObservableValue<out Window>, oldWindow: Window?, newWindow: Window?) {
+    private fun onWindowChange(@Suppress("UNUSED_PARAMETER") observable: ObservableValue<out Window>, oldWindow: Window?, newWindow: Window?) {
         oldWindow?.removeEventHandler(WindowEvent.WINDOW_HIDDEN, ::onWindowClosed)
         newWindow?.addEventHandler(WindowEvent.WINDOW_HIDDEN, ::onWindowClosed)
     }
 
-    private fun onWindowClosed(event: WindowEvent) {
+    private fun onWindowClosed(@Suppress("UNUSED_PARAMETER") event: WindowEvent) {
         shelfTreeView.sceneProperty().removeListener(::onSceneChange)
         MusicShelf.removeChangeListener(shelfChangeListener)
     }

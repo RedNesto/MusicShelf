@@ -20,7 +20,7 @@ object DesktopHelper {
             return
         }
 
-        this { desktop: Desktop ->
+        this {
             val absolutePath = filePath.toAbsolutePath().toString()
             when {
                 OsInfo.IS_WINDOWS -> Runtime.getRuntime().exec("explorer /select,\"$absolutePath\"")

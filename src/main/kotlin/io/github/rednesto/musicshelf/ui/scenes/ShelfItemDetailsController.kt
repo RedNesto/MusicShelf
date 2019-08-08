@@ -33,7 +33,7 @@ class ShelfItemDetailsController(val item: ShelfItem) : Initializable {
     lateinit var infoValueColumn: TableColumn<Pair<String, String>, String>
 
     @FXML
-    fun openFileButton_onAction(event: ActionEvent) {
+    fun openFileButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         DesktopHelper.open(item.path)
     }
 
@@ -41,7 +41,7 @@ class ShelfItemDetailsController(val item: ShelfItem) : Initializable {
     lateinit var showInExplorerButton: Button
 
     @FXML
-    fun showInExplorerButton_onAction(event: ActionEvent) {
+    fun showInExplorerButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         DesktopHelper.show(item.path)
     }
 

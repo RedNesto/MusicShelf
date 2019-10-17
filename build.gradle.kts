@@ -6,14 +6,17 @@ plugins {
 
     id("org.openjfx.javafxplugin") version "0.0.8"
     id("org.beryx.jlink") version "2.16.1"
+    id("com.novoda.build-properties") version "0.4.1"
 }
 
 group = "io.github.rednesto"
 version = "1.0-SNAPSHOT"
 
+buildProperties.create("local") { using(file("local-gradle.properties")) }
+
 repositories {
     mavenCentral()
-     maven {
+    maven {
         name = "sponge"
         url = uri("https://repo.spongepowered.org/maven")
     }

@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.openjfx.gradle.JavaFXOptions
 
 plugins {
-    kotlin("jvm") version "1.3.41"
+    kotlin("jvm") version "1.3.50"
 
     id("org.openjfx.javafxplugin") version "0.0.8"
-    id("org.beryx.jlink") version "2.14.0"
+    id("org.beryx.jlink") version "2.16.1"
 }
 
 group = "io.github.rednesto"
@@ -34,7 +34,7 @@ application {
 }
 
 configure<JavaFXOptions> {
-    version = "12"
+    version = "13"
 
     modules = listOf("javafx.controls", "javafx.fxml")
 }

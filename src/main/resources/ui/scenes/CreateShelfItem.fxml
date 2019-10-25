@@ -33,7 +33,7 @@
   </padding>
   <TextField fx:id="filePathTextField" GridPane.columnIndex="1" />
   <Label labelFor="$filePathTextField" mnemonicParsing="true" text="%shelf_item.file_path" />
-  <Button onAction="#selectFileButton_onAction" text="%create.shelf_item.select_file.button" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
+  <Button fx:id="selectFileButton" onAction="#selectFileButton_onAction" text="%create.shelf_item.select_file.button" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
   <SplitPane dividerPositions="0.65" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-padding: 0;" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
     <VBox>
       <Label fx:id="itemInfoLabel" mnemonicParsing="true" text="%shelf_item.info" VBox.vgrow="NEVER">

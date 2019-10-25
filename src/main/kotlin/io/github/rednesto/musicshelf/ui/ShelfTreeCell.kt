@@ -1,6 +1,9 @@
 package io.github.rednesto.musicshelf.ui
 
-import io.github.rednesto.musicshelf.*
+import io.github.rednesto.musicshelf.MusicShelfBundle
+import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.nameOrUnnamed
+import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
 import io.github.rednesto.musicshelf.ui.scenes.ShelfItemDetailsController
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.addClass
@@ -19,6 +22,7 @@ import javafx.scene.input.TransferMode
 import javafx.scene.text.Text
 import javafx.stage.Modality
 import javafx.stage.Stage
+import java.io.File
 import java.nio.file.Files
 
 class ShelfTreeCell : TreeCell<Any>() {
@@ -57,7 +61,7 @@ class ShelfTreeCell : TreeCell<Any>() {
     private fun addDragHandlers() {
         setOnDragOver { dragOverHandler(it) }
         setOnDragExited { dragExitedHandler() }
-        setOnDragDropped { dragDroppedHandler(it, mutableListOf(treeItem.group() + "/$text")) }
+        setOnDragDropped { dragDroppedHandler(it, mutableListOf(treeItem.group(text))) }
     }
 
     private fun removeDragHandlers() {
@@ -83,16 +87,9 @@ class ShelfTreeCell : TreeCell<Any>() {
 
     private fun dragDroppedHandler(event: DragEvent, groups: MutableList<String>) {
         val files = event.dragboard.files ?: return
-        files.forEach { file ->
-            val path = file.toPath()
-            if (!Files.isRegularFile(path)) {
-                return@forEach
-            }
-
-            val itemName = path.fileName.toString().substringBeforeLast('.')
-            val shelfItem = ShelfItemFactory.create(path, itemName, groups)
-            MusicShelf.addItem(shelfItem)
-        }
+        files.map(File::toPath)
+                .filter { path -> Files.isRegularFile(path) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, groups, true)) }
         event.isDropCompleted = true
         event.consume()
     }
@@ -148,9 +145,9 @@ class ShelfTreeCell : TreeCell<Any>() {
     }
 }
 
-private fun TreeItem<Any>.group(): String {
+private fun TreeItem<Any>.group(lastGroup: String? = null): String {
     if (parent?.value == null) {
-        return "/"
+        return lastGroup ?: "/"
     }
 
     var nextParent = parent
@@ -162,6 +159,10 @@ private fun TreeItem<Any>.group(): String {
             groups.add(0, segment)
         }
         nextParent = nextParent.parent
+    }
+
+    if (lastGroup != null) {
+        groups.add(lastGroup)
     }
 
     return groups.joinToString("/")

@@ -1,9 +1,10 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
-import io.github.rednesto.musicshelf.MusicShelf
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.ShelfItemFactory
 import io.github.rednesto.musicshelf.ShelfItemInfoKeys
+import io.github.rednesto.musicshelf.utils.getItemNameForPath
 import io.github.rednesto.musicshelf.utils.without
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.event.ActionEvent
@@ -20,10 +21,20 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
-class CreateShelfItemController : Initializable {
+class CreateShelfItemController @JvmOverloads constructor(
+        val initialFile: Path? = null,
+        val initialGroups: List<String> = listOf("/"),
+        val lockPath: Boolean = false
+) : Initializable {
+
+    var result: ShelfItem? = null
+        private set
 
     @FXML
     lateinit var filePathTextField: TextField
+
+    @FXML
+    lateinit var selectFileButton: Button
 
     @FXML
     fun selectFileButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
@@ -33,11 +44,15 @@ class CreateShelfItemController : Initializable {
 
         val selectedFile = chooser.showOpenDialog(null) ?: return
         filePathTextField.text = selectedFile.absolutePath
+        updateNameInfo(selectedFile.nameWithoutExtension)
+    }
+
+    private fun updateNameInfo(name: String) {
         val defaultNameValue = ShelfItemInfoKeys.DEFAULT_VALUES[ShelfItemInfoKeys.NAME]
                 ?: error("There should always be a default item name")
         itemInfoTableView.items.replaceAll { pair ->
             if (pair.first == ShelfItemInfoKeys.NAME && pair.second == defaultNameValue) {
-                return@replaceAll Pair(pair.first, selectedFile.nameWithoutExtension)
+                return@replaceAll Pair(pair.first, name)
             }
 
             return@replaceAll pair
@@ -130,7 +145,7 @@ class CreateShelfItemController : Initializable {
             return
         }
 
-        MusicShelf.addItem(ShelfItem(UUID.randomUUID(), itemPath, itemInfoTableView.items.toMap(mutableMapOf()), itemGroupsListView.items.toMutableList()))
+        result = ShelfItemFactory.create(itemPath, itemGroupsListView.items.toList(), itemInfoTableView.items.toMap())
 
         filePathTextField.scene.window.hide()
     }
@@ -181,6 +196,17 @@ class CreateShelfItemController : Initializable {
 
             event.consume()
         }
+
+        if (initialFile != null) {
+            val absoluteInitialPath = initialFile.toAbsolutePath()
+            filePathTextField.text = absoluteInitialPath.toString()
+            updateNameInfo(getItemNameForPath(absoluteInitialPath))
+            if (lockPath) {
+                selectFileButton.isDisable = true
+                filePathTextField.isEditable = false
+            }
+        }
+        itemGroupsListView.items.addAll(initialGroups)
     }
 
     private fun changeInfoKeyIfNeeded(originalKey: String, existingKeys: Collection<String>): String {

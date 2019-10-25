@@ -1,14 +1,12 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.MusicShelf
-import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.ShelfItemFactory
+import io.github.rednesto.musicshelf.ui.CreateShelfItemDialog
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
 import io.github.rednesto.musicshelf.ui.ShelfTreeViewHelper
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.addClass
-import io.github.rednesto.musicshelf.utils.loadFxml
 import io.github.rednesto.musicshelf.utils.removeClasses
 import javafx.beans.value.ObservableValue
 import javafx.collections.ListChangeListener
@@ -16,14 +14,12 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.geometry.Insets
-import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.input.*
-import javafx.stage.Modality
-import javafx.stage.Stage
 import javafx.stage.Window
 import javafx.stage.WindowEvent
+import java.io.File
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -51,16 +47,9 @@ class MainShelfController : Initializable {
     @FXML
     fun shelfTreeView_onDragDropped(event: DragEvent) {
         val files = event.dragboard.files ?: return
-        files.forEach { file ->
-            val path = file.toPath()
-            if (!Files.isRegularFile(path)) {
-                return@forEach
-            }
-
-            val itemName = path.fileName.toString().substringBeforeLast('.')
-            val shelfItem = ShelfItemFactory.create(path, itemName, listOf("/"))
-            MusicShelf.addItem(shelfItem)
-        }
+        files.map(File::toPath)
+                .filter { path -> Files.isRegularFile(path) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, lockPath = true)) }
         event.isDropCompleted = true
         event.consume()
     }
@@ -73,13 +62,7 @@ class MainShelfController : Initializable {
 
     @FXML
     fun addShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        val dialog = Stage().apply {
-            scene = Scene(loadFxml<Parent>("/ui/scenes/CreateShelfItem.fxml", resources = MusicShelfBundle.getBundle()))
-            title = MusicShelfBundle.get("create.shelf_item.window_title")
-            initModality(Modality.APPLICATION_MODAL)
-        }
-
-        dialog.showAndWait()
+        CreateShelfItemDialog.showAndUpdateShelf()
     }
 
     @FXML

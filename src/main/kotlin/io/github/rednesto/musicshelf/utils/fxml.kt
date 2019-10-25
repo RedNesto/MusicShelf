@@ -6,14 +6,18 @@ import java.net.URL
 import java.util.*
 
 fun <T> loadFxml(location: String, controller: Any? = null, resources: ResourceBundle? = null): T {
-    val locationUrl = MusicShelfApp::class.java.getResource(location)
-            ?: throw NullPointerException("Could not find fxml file at $location")
-    return loadFxml(locationUrl, controller, resources)
+    return configureFxmlLoader(location, controller, resources).load()
 }
 
-fun <T> loadFxml(location: URL, controller: Any? = null, resources: ResourceBundle? = null): T {
+fun configureFxmlLoader(location: String, controller: Any? = null, resources: ResourceBundle? = null): FXMLLoader {
+    val locationUrl = MusicShelfApp::class.java.getResource(location)
+            ?: throw NullPointerException("Could not find fxml file at $location")
+    return configureFxmlLoader(locationUrl, controller, resources)
+}
+
+fun configureFxmlLoader(location: URL, controller: Any? = null, resources: ResourceBundle? = null): FXMLLoader {
     val loader = FXMLLoader(location)
     loader.resources = resources
     loader.setController(controller)
-    return loader.load()
+    return loader
 }

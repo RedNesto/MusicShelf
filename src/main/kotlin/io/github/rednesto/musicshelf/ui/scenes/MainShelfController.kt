@@ -3,14 +3,19 @@ package io.github.rednesto.musicshelf.ui.scenes
 import io.github.rednesto.musicshelf.MusicShelf
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.ShelfItemFactory
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
+import io.github.rednesto.musicshelf.ui.ShelfTreeViewHelper
 import io.github.rednesto.musicshelf.utils.DesktopHelper
+import io.github.rednesto.musicshelf.utils.addClass
 import io.github.rednesto.musicshelf.utils.loadFxml
+import io.github.rednesto.musicshelf.utils.removeClasses
 import javafx.beans.value.ObservableValue
 import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.geometry.Insets
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.*
@@ -20,12 +25,45 @@ import javafx.stage.Stage
 import javafx.stage.Window
 import javafx.stage.WindowEvent
 import java.net.URL
+import java.nio.file.Files
 import java.util.*
 
 class MainShelfController : Initializable {
 
     @FXML
     lateinit var shelfTreeView: TreeView<Any>
+    private lateinit var shelfTreeViewHelper: ShelfTreeViewHelper
+
+    @FXML
+    fun shelfTreeView_onDragOver(event: DragEvent) {
+        if (event.dragboard.hasFiles()) {
+            event.acceptTransferModes(TransferMode.LINK)
+            shelfTreeView.addClass("drag-over-highlight")
+        }
+        event.consume()
+    }
+
+    @FXML
+    fun shelfTreeView_onDragExited(@Suppress("UNUSED_PARAMETER") event: DragEvent) {
+        shelfTreeView.removeClasses("drag-over-highlight")
+    }
+
+    @FXML
+    fun shelfTreeView_onDragDropped(event: DragEvent) {
+        val files = event.dragboard.files ?: return
+        files.forEach { file ->
+            val path = file.toPath()
+            if (!Files.isRegularFile(path)) {
+                return@forEach
+            }
+
+            val itemName = path.fileName.toString().substringBeforeLast('.')
+            val shelfItem = ShelfItemFactory.create(path, itemName, listOf("/"))
+            MusicShelf.addItem(shelfItem)
+        }
+        event.isDropCompleted = true
+        event.consume()
+    }
 
     @FXML
     lateinit var emptyShelfPlaceholderHyperlink: Hyperlink
@@ -64,81 +102,15 @@ class MainShelfController : Initializable {
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        shelfTreeViewHelper = ShelfTreeViewHelper(shelfTreeView)
         shelfTreeView.selectionModel.selectionMode = SelectionMode.MULTIPLE
+        shelfTreeView.padding = Insets(1.0)
         shelfTreeView.setCellFactory { ShelfTreeCell() }
         shelfTreeView.sceneProperty().addListener(::onSceneChange)
         MusicShelf.addChangeListener(shelfChangeListener)
-        shelfTreeView.root = createShelfTreeViewRoot()
-    }
-
-    private fun createShelfTreeViewRoot(): TreeItem<Any> {
-        return TreeItem<Any>().apply {
-            children.addListener(ListChangeListener {
-                emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty()
-            })
-            val groups = mutableMapOf<String?, MutableList<TreeItem<Any>>>()
-            MusicShelf.getAllItems().forEach { shelfItem ->
-                val itemGroups = shelfItem.groups
-                if (itemGroups.isEmpty()) {
-                    val group = groups.computeIfAbsent(null) { mutableListOf() }
-                    group.add(TreeItem(shelfItem))
-                } else {
-                    itemGroups.forEach {
-                        val groupName = if (it == "/") null else it.trimEnd('/')
-                        val group = groups.computeIfAbsent(groupName) { mutableListOf() }
-                        group.add(TreeItem(shelfItem))
-                    }
-                }
-            }
-            val groupNodes = mutableMapOf<String?, TreeItem<Any>>()
-            groups.keys.forEach { groupPath ->
-                val groupItem = if (groupPath == null) {
-                    this
-                } else {
-                    val groupName = groupPath.substringAfterLast('/')
-                    var slashIndex = groupPath.indexOf('/')
-                    val parentGroup = if (slashIndex != -1) {
-                        val lastGroupPath = groupPath.substring(0, slashIndex)
-                        var lastGroupNode: TreeItem<Any> = groupNodes.getOrPut(lastGroupPath) {
-                            val item: TreeItem<Any> = TreeItem(lastGroupPath)
-                            children.add(item)
-                            item
-                        }
-                        while (true) {
-                            val nextSlashIndex = groupPath.indexOf('/', slashIndex + 1)
-                            if (nextSlashIndex == -1)
-                                break
-
-                            val parentGroupName = groupPath.substring(slashIndex + 1, nextSlashIndex)
-                            val nextItem: TreeItem<Any> = groupNodes.getOrPut(groupPath.substring(0, nextSlashIndex)) {
-                                val item: TreeItem<Any> = TreeItem(parentGroupName)
-                                lastGroupNode.children.add(item)
-                                item
-                            }
-
-
-                            lastGroupNode = nextItem
-                            slashIndex = nextSlashIndex
-                        }
-
-                        lastGroupNode
-                    } else null
-                    val treeItem = TreeItem<Any>(groupName)
-                    if (parentGroup != null) {
-                        parentGroup.children.add(treeItem)
-                    } else {
-                        children.add(treeItem)
-                    }
-
-                    treeItem
-                }
-                groupNodes[groupPath] = groupItem
-            }
-            groups.forEach { (groupPath, items) ->
-                val groupNode = groupNodes[groupPath]
-                assert(groupNode != null) { "There should always be a group node" }
-                groupNode!!.children.addAll(items)
-            }
+        shelfTreeViewHelper.recreateRootNode().apply {
+            emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty()
+            children.addListener(ListChangeListener { emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty() })
         }
     }
 
@@ -182,7 +154,13 @@ class MainShelfController : Initializable {
 
     private inner class MusicShelfChangeListener : MusicShelf.SimpleChangeListener {
         override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
-            shelfTreeView.root = createShelfTreeViewRoot()
+            if (oldItem != null) {
+                shelfTreeViewHelper.removeItem(oldItem)
+            }
+
+            if (newItem != null) {
+                shelfTreeViewHelper.insertItem(newItem)
+            }
         }
     }
 }

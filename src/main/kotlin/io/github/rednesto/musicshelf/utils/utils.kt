@@ -9,3 +9,9 @@ fun <E, R : MutableCollection<E>> MutableCollection<E>.without(element: E, desti
     destination.remove(element)
     return destination
 }
+
+fun <E> MutableList<E>.addIfAbsent(element: E) {
+    if (!this.contains(element)) {
+        this.add(element)
+    }
+}

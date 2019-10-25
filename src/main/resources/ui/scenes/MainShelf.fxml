@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.rednesto.musicshelf.ui.scenes.MainShelfController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@main.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.rednesto.musicshelf.ui.scenes.MainShelfController">
   <columnConstraints>
     <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
   </columnConstraints>
@@ -17,7 +17,7 @@
     <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
     <RowConstraints vgrow="NEVER" />
   </rowConstraints>
-  <TreeView fx:id="shelfTreeView" onMouseClicked="#shelfTreeView_onMouseClicked" showRoot="false" />
+  <TreeView fx:id="shelfTreeView" onDragDropped="#shelfTreeView_onDragDropped" onDragExited="#shelfTreeView_onDragExited" onDragOver="#shelfTreeView_onDragOver" onMouseClicked="#shelfTreeView_onMouseClicked" showRoot="false" />
   <Hyperlink fx:id="emptyShelfPlaceholderHyperlink" onAction="#addShelfItemButton_onAction" text="%shelf.placeholder" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
   <ButtonBar maxWidth="1.7976931348623157E308" GridPane.rowIndex="1">
     <buttons>

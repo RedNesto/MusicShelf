@@ -1,5 +1,6 @@
 package io.github.rednesto.musicshelf
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import kotlin.reflect.KProperty
@@ -31,5 +32,17 @@ class ShelfItemInfoDelegate(private val infoKey: String) {
         } else {
             backed.infos[ShelfItemInfoKeys.NAME] = value
         }
+    }
+}
+
+object ShelfItemFactory {
+    fun create(path: Path, name: String, groups: List<String> = emptyList(), vararg additionalInfos: Pair<String, String> = emptyArray()): ShelfItem {
+        if (!Files.isRegularFile(path)) {
+            throw IllegalStateException("Cannot create a ShelfItem whose path does not exists or is not a file.")
+        }
+
+        val infos = additionalInfos.toMap(mutableMapOf())
+        infos[ShelfItemInfoKeys.NAME] = name
+        return ShelfItem(UUID.randomUUID(), path, infos, groups.toMutableList())
     }
 }

@@ -1,0 +1,8 @@
+.drag-over-highlight {
+    -fx-background-color: red;
+}
+
+.drag-over-highlight-cell {
+    -fx-background-color: -fx-background, red, -fx-background;
+    -fx-background-insets: 0, 1, 2;
+}

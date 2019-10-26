@@ -21,14 +21,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
-class CreateShelfItemController @JvmOverloads constructor(
+open class CreateShelfItemController @JvmOverloads constructor(
         val initialFile: Path? = null,
         val initialGroups: List<String> = listOf("/"),
+        val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
         val lockPath: Boolean = false
 ) : Initializable {
 
     var result: ShelfItem? = null
         private set
+
+    open val createButtonTextKey = "create.shelf_item.create"
 
     @FXML
     lateinit var filePathTextField: TextField
@@ -145,10 +148,13 @@ class CreateShelfItemController @JvmOverloads constructor(
             return
         }
 
-        result = ShelfItemFactory.create(itemPath, itemGroupsListView.items.toList(), itemInfoTableView.items.toMap())
+        result = createItem(itemPath, itemGroupsListView.items.toList(), itemInfoTableView.items.toMap())
 
         filePathTextField.scene.window.hide()
     }
+
+    protected open fun createItem(itemPath: Path, groups: List<String>, info: Map<String, String>) =
+            ShelfItemFactory.create(itemPath, groups, info)
 
     @FXML
     fun cancelButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
@@ -156,6 +162,8 @@ class CreateShelfItemController @JvmOverloads constructor(
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        createButton.text = resources?.getString(createButtonTextKey) ?: createButtonTextKey
+
         filePathTextField.textProperty().addListener { _, _, newValue ->
             createButton.isDisable = newValue.isNullOrBlank()
         }
@@ -178,7 +186,7 @@ class CreateShelfItemController @JvmOverloads constructor(
             itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(second = event.newValue)
         }
 
-        itemInfoTableView.items.addAll(ShelfItemInfoKeys.DEFAULT_VALUES.toList())
+        itemInfoTableView.items.addAll(initialInfo.toList())
 
         itemGroupsLabel.labelFor = itemGroupsListView
         itemGroupsListView.selectionModel.selectionMode = SelectionMode.MULTIPLE

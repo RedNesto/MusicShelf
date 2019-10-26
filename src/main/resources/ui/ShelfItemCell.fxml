@@ -24,6 +24,7 @@
       <items>
         <MenuItem text="%shelf.item.open" onAction="#openMenuItem_onAction" />
         <MenuItem text="%shelf.item.show_details" onAction="#showDetailsMenuItem_onAction" />
+        <MenuItem text="%shelf.item.edit" onAction="#editMenuItem_onAction" />
       </items>
     </ContextMenu>
   </fx:define>

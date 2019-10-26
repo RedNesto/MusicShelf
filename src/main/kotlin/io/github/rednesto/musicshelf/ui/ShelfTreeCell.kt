@@ -85,7 +85,7 @@ class ShelfTreeCell : TreeCell<Any>() {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
-                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, groups, true)) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, groups, lockPath = true)) }
         event.isDropCompleted = true
         event.consume()
     }
@@ -113,6 +113,11 @@ class ShelfTreeCell : TreeCell<Any>() {
                 initModality(Modality.APPLICATION_MODAL)
                 showAndWait()
             }
+        }
+
+        @FXML
+        fun editMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
+            EditShelfItemDialog.showAndUpdateShelf(item)
         }
 
         @FXML

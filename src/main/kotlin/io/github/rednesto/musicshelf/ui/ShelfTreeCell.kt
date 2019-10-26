@@ -4,7 +4,6 @@ import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.nameOrUnnamed
 import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
-import io.github.rednesto.musicshelf.ui.scenes.ShelfItemDetailsController
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.addClass
 import io.github.rednesto.musicshelf.utils.loadFxml
@@ -12,8 +11,6 @@ import io.github.rednesto.musicshelf.utils.removeClasses
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Node
-import javafx.scene.Parent
-import javafx.scene.Scene
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.TreeCell
 import javafx.scene.control.TreeItem
@@ -21,7 +18,6 @@ import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
 import javafx.scene.text.Text
 import javafx.stage.Modality
-import javafx.stage.Stage
 import java.io.File
 import java.nio.file.Files
 
@@ -113,9 +109,7 @@ class ShelfTreeCell : TreeCell<Any>() {
 
         @FXML
         fun showDetailsMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-            Stage().apply {
-                title = MusicShelfBundle.get("shelf_item.details.window_title", item.nameOrUnnamed)
-                scene = Scene(loadFxml<Parent>("/ui/scenes/ShelfItemDetails.fxml", ShelfItemDetailsController(item), MusicShelfBundle.getBundle()))
+            with(ShelfItemDetailsWindow.create(item)) {
                 initModality(Modality.APPLICATION_MODAL)
                 showAndWait()
             }

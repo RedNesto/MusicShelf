@@ -2,6 +2,7 @@ package io.github.rednesto.musicshelf.ui
 
 import io.github.rednesto.musicshelf.MusicShelf
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.utils.normalizeGroup
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 
@@ -110,15 +111,4 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
     fun removeItem(shelfItem: ShelfItem) {
         removeFromGroups(shelfItem)
     }
-}
-
-private fun isRootGroup(group: String): Boolean = group == "/"
-
-private fun normalizeGroup(group: String): String {
-    val trimmedGroup = group.trim()
-    if (isRootGroup(trimmedGroup)) {
-        return trimmedGroup
-    }
-
-    return trimmedGroup.trim('/')
 }

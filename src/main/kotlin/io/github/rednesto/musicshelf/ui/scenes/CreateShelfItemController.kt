@@ -5,6 +5,8 @@ import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ShelfItemFactory
 import io.github.rednesto.musicshelf.ShelfItemInfoKeys
 import io.github.rednesto.musicshelf.utils.getItemNameForPath
+import io.github.rednesto.musicshelf.utils.normalizeGroup
+import io.github.rednesto.musicshelf.utils.normalizeGroups
 import io.github.rednesto.musicshelf.utils.without
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.event.ActionEvent
@@ -148,7 +150,9 @@ open class CreateShelfItemController @JvmOverloads constructor(
             return
         }
 
-        result = createItem(itemPath, itemGroupsListView.items.toList(), itemInfoTableView.items.toMap())
+
+        val groups = if (itemGroupsListView.items.isNotEmpty()) normalizeGroups(itemGroupsListView.items) else listOf("/")
+        result = createItem(itemPath, groups, itemInfoTableView.items.toMap())
 
         filePathTextField.scene.window.hide()
     }
@@ -198,7 +202,7 @@ open class CreateShelfItemController @JvmOverloads constructor(
                 val oldValue = itemGroupsListView.items[event.index]
                 if (event.newValue != oldValue) {
                     val newKey = changeInfoKeyIfNeeded(event.newValue, itemGroupsListView.items.without(oldValue))
-                    itemGroupsListView.items[event.index] = newKey
+                    itemGroupsListView.items[event.index] = normalizeGroup(newKey)
                 }
             }
 

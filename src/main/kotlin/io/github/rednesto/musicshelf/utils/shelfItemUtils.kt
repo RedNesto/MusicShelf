@@ -4,6 +4,11 @@ import java.nio.file.Path
 
 fun getItemNameForPath(path: Path): String = path.fileName.toString().substringBeforeLast('.')
 
+fun isRootGroup(group: String, normalize: Boolean = false): Boolean {
+    val testGroup = if (normalize) normalizeGroup(group) else group
+    return testGroup == "/"
+}
+
 fun normalizeGroup(group: String): String {
     fun isSuperfluousChar(c: Char) = c == '/' || c.isWhitespace()
 

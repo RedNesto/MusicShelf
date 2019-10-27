@@ -2,6 +2,9 @@ package io.github.rednesto.musicshelf.ui
 
 import io.github.rednesto.musicshelf.MusicShelf
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.nameOrUnnamed
+import io.github.rednesto.musicshelf.utils.addIfAbsent
+import io.github.rednesto.musicshelf.utils.isRootGroup
 import io.github.rednesto.musicshelf.utils.normalizeGroup
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
@@ -34,9 +37,9 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
         itemsByGroup.keys.forEach { group -> getGroupItem(group, rootNode) }
 
         // Create TreeItems for each ShelfItems and move them to their appropriate group TreeItem
-        itemsByGroup.forEach { (fullGroup, item) ->
+        itemsByGroup.forEach { (fullGroup, items) ->
             val groupItem = groupItems[fullGroup] ?: rootNode
-            groupItem.children.addAll(item)
+            addChildrenAndSort(groupItem, items)
         }
 
         treeView.root = rootNode
@@ -48,17 +51,11 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
      * If the TreeItem does not exist it is created and added to the TreeView.
      */
     private fun getGroupItem(group: String, rootNode: TreeItem<Any> = treeView.root): TreeItem<Any> {
-        fun createGroupItem(group: String, parent: TreeItem<Any>): TreeItem<Any> {
-            val item: TreeItem<Any> = TreeItem(group)
-            parent.children.add(item)
-            return item
-        }
-
         if (group == "/") {
             groupItems["/"] = rootNode
             return rootNode
         } else if (!group.contains('/')) {
-            return groupItems.computeIfAbsent(group) { createGroupItem(group, rootNode) }
+            return groupItems.computeIfAbsent(group) { TreeItem<Any>(group).apply { addChildAndSort(rootNode, this) } }
         } else {
             var previousSlash = 0
             var childGroupItem: TreeItem<Any> = rootNode
@@ -69,7 +66,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
                 val groupPath = group.substring(0, nextGroupEnd)
                 childGroupItem = groupItems.computeIfAbsent(groupPath) {
                     val groupName = group.substring(previousSlash, nextGroupEnd)
-                    createGroupItem(groupName, childGroupItem)
+                    TreeItem<Any>(groupName).apply { addChildAndSort(childGroupItem, this) }
                 }
 
                 if (nextSlash == -1) {
@@ -88,7 +85,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
             val normalizedGroup = normalizeGroup(group)
             val shelfTreeItem: TreeItem<Any> = TreeItem(shelfItem)
             itemsByGroup.computeIfAbsent(normalizedGroup) { mutableListOf() }
-                    .add(shelfTreeItem)
+                    .addIfAbsent(shelfTreeItem)
             additionalAction?.invoke(shelfTreeItem, normalizedGroup)
         }
     }
@@ -105,10 +102,58 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
     }
 
     fun insertItem(item: ShelfItem) {
-        addToGroups(item) { shelfTreeItem, group -> getGroupItem(group).children.add(shelfTreeItem) }
+        addToGroups(item) { shelfTreeItem, group ->
+            val groupItem = getGroupItem(group)
+            addChildAndSort(groupItem, shelfTreeItem)
+
+            if (!isRootGroup(group) && groupItem.parent == null) {
+                // If this group's parent is the root group its path does not contain a slash,
+                // thus we need to fallback to the root path
+                val groupParentItem = getGroupItem(group.substringBeforeLast('/', "/"))
+                addChildAndSort(groupParentItem, groupItem)
+            }
+        }
     }
 
     fun removeItem(shelfItem: ShelfItem) {
         removeFromGroups(shelfItem)
     }
+}
+
+/**
+ * Default comparator used to sort items on a shelf TreeView.
+ *
+ * Groups are always on top, sorted by natural order of their name
+ * Items (leafs) are always under groups, sorted by natural order of their name
+ */
+object ShelfItemComparator : Comparator<TreeItem<Any>> { // TODO I want my own tests :(
+    override fun compare(o1: TreeItem<Any>, o2: TreeItem<Any>): Int {
+        val value1 = o1.value
+        val value2 = o2.value
+        return if (value1 is String && value2 is String) {
+            value1.compareTo(value2, true)
+        } else if (value1 is ShelfItem && value2 is ShelfItem) {
+            value1.nameOrUnnamed.compareTo(value2.nameOrUnnamed, true)
+        } else if (value1 is String) {
+            -1
+        } else 1
+    }
+}
+
+fun addChildAndSort(parent: TreeItem<Any>, child: TreeItem<Any>) {
+    if (parent.children.addIfAbsent(child)) {
+        sortItems(parent)
+    }
+}
+
+fun addChildrenAndSort(parent: TreeItem<Any>, children: Collection<TreeItem<Any>>) {
+    // Removes all duplicates from the children collection as well as those already present in the parent
+    val uniqueChildren = children.toMutableSet().apply { removeAll(parent.children) }
+    if (uniqueChildren.isNotEmpty() && parent.children.addAll(uniqueChildren)) {
+        sortItems(parent)
+    }
+}
+
+fun sortItems(item: TreeItem<Any>) {
+    item.children.sortWith(ShelfItemComparator)
 }

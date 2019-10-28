@@ -27,6 +27,14 @@ import java.util.*
 class MainShelfController : Initializable {
 
     @FXML
+    lateinit var shelfSearchTextField: TextField
+
+    @FXML
+    fun shelfSearchTextField_onKeyTyped(event: KeyEvent) {
+        shelfTreeViewHelper.filter(shelfSearchTextField.text)
+    }
+
+    @FXML
     lateinit var shelfTreeView: TreeView<Any>
     private lateinit var shelfTreeViewHelper: ShelfTreeViewHelper
 

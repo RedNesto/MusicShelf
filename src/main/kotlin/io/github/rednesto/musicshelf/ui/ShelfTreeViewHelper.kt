@@ -11,14 +11,65 @@ import javafx.scene.control.TreeView
 
 class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
 
+    private var filter: String? = null
+
+    val rootItem: ShelfTreeRootItem = ShelfTreeRootItem()
+    /** Root node used to display search results */
+    private var filteredRootItem: ShelfTreeRootItem = ShelfTreeRootItem()
+
+    fun recreateRootNode(): TreeItem<Any> {
+        val newRoot = rootItem.recreate(MusicShelf.getAllItems())
+        treeView.root = newRoot
+        return newRoot
+    }
+
+    fun filter(filter: String?) {
+        if (filter.isNullOrBlank()) {
+            this.filter = null
+            treeView.root = rootItem.treeItem
+        } else {
+            this.filter = filter
+            treeView.root = filteredRootItem.recreate(filterItems())
+        }
+    }
+
+    private fun filterItems(): Collection<ShelfItem> {
+        val filter = this.filter ?: return MusicShelf.getAllItems()
+        return MusicShelf.getAllItems().filter { it.nameOrUnnamed.contains(filter, true) }
+    }
+
+    fun insertItem(item: ShelfItem) {
+        rootItem.addItem(item)
+        if (this.filter != null) {
+            treeView.root = filteredRootItem.recreate(filterItems())
+        }
+    }
+
+    fun removeItem(item: ShelfItem) {
+        rootItem.removeItem(item)
+        if (this.filter != null) {
+            treeView.root = filteredRootItem.recreate(filterItems())
+        }
+    }
+}
+
+class ShelfTreeRootItem {
+
+    var treeItem: TreeItem<Any>? = null
+        private set
+
     private val groupItems = mutableMapOf<String, TreeItem<Any>>()
     private val itemsByGroup = mutableMapOf<String, MutableList<TreeItem<Any>>>()
 
-    fun recreateRootNode(): TreeItem<Any> {
+    fun recreate(items: Collection<ShelfItem>): TreeItem<Any> {
+        treeItem = null
+        groupItems.clear()
+        itemsByGroup.clear()
+
         val rootNode = TreeItem<Any>()
 
         // Group all items of the shelf
-        MusicShelf.getAllItems().forEach { addToGroups(it) }
+        items.forEach { addToGroups(it) }
 
         /*
          * Create a TreeItem for every full group.
@@ -42,7 +93,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
             addChildrenAndSort(groupItem, items)
         }
 
-        treeView.root = rootNode
+        treeItem = rootNode
         return rootNode
     }
 
@@ -50,7 +101,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
      * Returns the TreeItem associated to the given group.
      * If the TreeItem does not exist it is created and added to the TreeView.
      */
-    private fun getGroupItem(group: String, rootNode: TreeItem<Any> = treeView.root): TreeItem<Any> {
+    private fun getGroupItem(group: String, rootNode: TreeItem<Any>): TreeItem<Any> {
         if (group == "/") {
             groupItems["/"] = rootNode
             return rootNode
@@ -101,15 +152,17 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
         }
     }
 
-    fun insertItem(item: ShelfItem) {
+    fun addItem(item: ShelfItem) {
+        val rootNode = this.treeItem
+        checkNotNull(rootNode)
         addToGroups(item) { shelfTreeItem, group ->
-            val groupItem = getGroupItem(group)
+            val groupItem = getGroupItem(group, rootNode)
             addChildAndSort(groupItem, shelfTreeItem)
 
             if (!isRootGroup(group) && groupItem.parent == null) {
                 // If this group's parent is the root group its path does not contain a slash,
                 // thus we need to fallback to the root path
-                val groupParentItem = getGroupItem(group.substringBeforeLast('/', "/"))
+                val groupParentItem = getGroupItem(group.substringBeforeLast('/', "/"), rootNode)
                 addChildAndSort(groupParentItem, groupItem)
             }
         }
@@ -140,13 +193,13 @@ object ShelfItemComparator : Comparator<TreeItem<Any>> { // TODO I want my own t
     }
 }
 
-fun addChildAndSort(parent: TreeItem<Any>, child: TreeItem<Any>) {
+private fun addChildAndSort(parent: TreeItem<Any>, child: TreeItem<Any>) {
     if (parent.children.addIfAbsent(child)) {
         sortItems(parent)
     }
 }
 
-fun addChildrenAndSort(parent: TreeItem<Any>, children: Collection<TreeItem<Any>>) {
+private fun addChildrenAndSort(parent: TreeItem<Any>, children: Collection<TreeItem<Any>>) {
     // Removes all duplicates from the children collection as well as those already present in the parent
     val uniqueChildren = children.toMutableSet().apply { removeAll(parent.children) }
     if (uniqueChildren.isNotEmpty() && parent.children.addAll(uniqueChildren)) {
@@ -154,6 +207,6 @@ fun addChildrenAndSort(parent: TreeItem<Any>, children: Collection<TreeItem<Any>
     }
 }
 
-fun sortItems(item: TreeItem<Any>) {
+private fun sortItems(item: TreeItem<Any>) {
     item.children.sortWith(ShelfItemComparator)
 }

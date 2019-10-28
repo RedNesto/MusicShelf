@@ -4,10 +4,7 @@ import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ShelfItemFactory
 import io.github.rednesto.musicshelf.ShelfItemInfoKeys
-import io.github.rednesto.musicshelf.utils.getItemNameForPath
-import io.github.rednesto.musicshelf.utils.normalizeGroup
-import io.github.rednesto.musicshelf.utils.normalizeGroups
-import io.github.rednesto.musicshelf.utils.without
+import io.github.rednesto.musicshelf.utils.*
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -25,7 +22,7 @@ import java.util.*
 
 open class CreateShelfItemController @JvmOverloads constructor(
         val initialFile: Path? = null,
-        val initialGroups: List<String> = listOf("/"),
+        val initialGroups: List<String> = emptyList(),
         val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
         val lockPath: Boolean = false
 ) : Initializable {
@@ -113,6 +110,8 @@ open class CreateShelfItemController @JvmOverloads constructor(
         val groupName = changeInfoKeyIfNeeded(MusicShelfBundle.get("create.shelf_item.group.default_name"), itemGroupsListView.items)
         itemGroupsListView.items.add(groupName)
         itemGroupsListView.scrollTo(groupName)
+        itemGroupsListView.requestFocus()
+        itemGroupsListView.selectionModel.clearAndSelect(itemGroupsListView.items.lastIndex)
     }
 
     @FXML
@@ -196,13 +195,14 @@ open class CreateShelfItemController @JvmOverloads constructor(
         itemGroupsListView.selectionModel.selectionMode = SelectionMode.MULTIPLE
         itemGroupsListView.cellFactory = TextFieldListCell.forListView()
         itemGroupsListView.setOnEditCommit { event ->
-            if (event.newValue.isEmpty()) {
+            val newGroup = normalizeGroup(event.newValue)
+            if (isRootGroup(newGroup)) {
                 itemGroupsListView.items.removeAt(event.index)
             } else {
                 val oldValue = itemGroupsListView.items[event.index]
-                if (event.newValue != oldValue) {
-                    val newKey = changeInfoKeyIfNeeded(event.newValue, itemGroupsListView.items.without(oldValue))
-                    itemGroupsListView.items[event.index] = normalizeGroup(newKey)
+                if (newGroup != oldValue) {
+                    val newKey = changeInfoKeyIfNeeded(newGroup, itemGroupsListView.items.without(oldValue))
+                    itemGroupsListView.items[event.index] = newKey
                 }
             }
 
@@ -218,7 +218,10 @@ open class CreateShelfItemController @JvmOverloads constructor(
                 filePathTextField.isEditable = false
             }
         }
-        itemGroupsListView.items.addAll(initialGroups)
+
+        val sanitizedInitialGroups = initialGroups.toMutableSet()
+        sanitizedInitialGroups.removeAll { isRootGroup(it) }
+        itemGroupsListView.items.addAll(sanitizedInitialGroups)
     }
 
     private fun changeInfoKeyIfNeeded(originalKey: String, existingKeys: Collection<String>): String {

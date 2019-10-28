@@ -64,7 +64,11 @@
           <Insets bottom="2.0" left="5.0" top="5.0" />
         </VBox.margin>
       </Label>
-      <ListView fx:id="itemGroupsListView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onKeyPressed="#itemGroupsListView_onKeyPressed" VBox.vgrow="ALWAYS" />
+      <ListView fx:id="itemGroupsListView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onKeyPressed="#itemGroupsListView_onKeyPressed" VBox.vgrow="ALWAYS">
+        <placeholder>
+          <Text text="%create.shelf_item.group.placeholder" />
+        </placeholder>
+      </ListView>
       <HBox spacing="10.0" VBox.vgrow="NEVER">
         <Button onAction="#addGroupButton_onAction" text="%create.shelf_item.group.add" />
         <Button onAction="#removeGroupButton_onAction" text="%create.shelf_item.group.remove" />

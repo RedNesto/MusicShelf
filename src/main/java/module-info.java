@@ -2,6 +2,9 @@ module musicshelf {
     requires kotlin.stdlib;
     requires kotlin.stdlib.jdk8;
 
+    requires kotlinx.coroutines.core;
+    requires kotlinx.coroutines.javafx;
+
     requires java.desktop;
 
     requires javafx.controls;

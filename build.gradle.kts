@@ -24,6 +24,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.2")
     implementation("org.jetbrains:annotations:17.0.0")
     implementation("org.spongepowered:configurate-xml:3.6")
 

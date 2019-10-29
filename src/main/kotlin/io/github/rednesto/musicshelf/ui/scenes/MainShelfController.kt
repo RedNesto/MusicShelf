@@ -19,7 +19,10 @@ import javafx.scene.control.*
 import javafx.scene.input.*
 import javafx.stage.Window
 import javafx.stage.WindowEvent
+import kotlinx.coroutines.*
+import kotlinx.coroutines.javafx.JavaFx
 import java.io.File
+import java.lang.Runnable
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -29,9 +32,16 @@ class MainShelfController : Initializable {
     @FXML
     lateinit var shelfSearchTextField: TextField
 
+    private var filterUpdateJob: Job? = null
+
     @FXML
-    fun shelfSearchTextField_onKeyTyped(event: KeyEvent) {
-        shelfTreeViewHelper.filter(shelfSearchTextField.text)
+    fun shelfSearchTextField_onKeyTyped(@Suppress("UNUSED_PARAMETER") event: KeyEvent) {
+        filterUpdateJob?.cancel()
+        filterUpdateJob = GlobalScope.launch(Dispatchers.JavaFx) {
+            delay(1000)
+            shelfTreeViewHelper.filter(shelfSearchTextField.text)
+            filterUpdateJob = null
+        }
     }
 
     @FXML

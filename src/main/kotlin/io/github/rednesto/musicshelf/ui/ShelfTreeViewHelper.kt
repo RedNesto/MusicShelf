@@ -1,8 +1,6 @@
 package io.github.rednesto.musicshelf.ui
 
-import io.github.rednesto.musicshelf.MusicShelf
-import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.nameOrUnnamed
+import io.github.rednesto.musicshelf.*
 import io.github.rednesto.musicshelf.utils.addIfAbsent
 import io.github.rednesto.musicshelf.utils.isRootGroup
 import io.github.rednesto.musicshelf.utils.normalizeGroup
@@ -11,7 +9,7 @@ import javafx.scene.control.TreeView
 
 class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
 
-    private var filter: String? = null
+    private var filter: ShelfItemFilter? = null
 
     val rootItem: ShelfTreeRootItem = ShelfTreeRootItem()
     /** Root node used to display search results */
@@ -21,21 +19,6 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
         val newRoot = rootItem.recreate(MusicShelf.getAllItems())
         treeView.root = newRoot
         return newRoot
-    }
-
-    fun filter(filter: String?) {
-        if (filter.isNullOrBlank()) {
-            this.filter = null
-            treeView.root = rootItem.treeItem
-        } else {
-            this.filter = filter
-            treeView.root = filteredRootItem.recreate(filterItems())
-        }
-    }
-
-    private fun filterItems(): Collection<ShelfItem> {
-        val filter = this.filter ?: return MusicShelf.getAllItems()
-        return MusicShelf.getAllItems().filter { it.nameOrUnnamed.contains(filter, true) }
     }
 
     fun insertItem(item: ShelfItem) {
@@ -50,6 +33,25 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
         if (this.filter != null) {
             treeView.root = filteredRootItem.recreate(filterItems())
         }
+    }
+
+    fun filter(filter: String?) {
+        if (filter.isNullOrBlank()) {
+            this.filter = null
+            treeView.root = rootItem.treeItem
+        } else {
+            this.filter = ShelfItemFilter(ShelfItemFilterDataParser.parseFilter(filter))
+            treeView.root = filteredRootItem.recreate(filterItems())
+        }
+    }
+
+    fun clearFilter() {
+        filter(null)
+    }
+
+    private fun filterItems(): Collection<ShelfItem> {
+        val filter = this.filter ?: return MusicShelf.getAllItems()
+        return MusicShelf.getAllItems().filter(filter)
     }
 }
 

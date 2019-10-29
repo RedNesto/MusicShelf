@@ -4,6 +4,7 @@ import io.github.rednesto.musicshelf.*
 import io.github.rednesto.musicshelf.utils.addIfAbsent
 import io.github.rednesto.musicshelf.utils.isRootGroup
 import io.github.rednesto.musicshelf.utils.normalizeGroup
+import javafx.beans.value.WeakChangeListener
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 
@@ -13,7 +14,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
 
     val rootItem: ShelfTreeRootItem = ShelfTreeRootItem()
     /** Root node used to display search results */
-    private var filteredRootItem: ShelfTreeRootItem = ShelfTreeRootItem()
+    private var filteredRootItem: ShelfTreeRootItem = ShelfTreeRootItem().apply { alwaysRememberExpandedGroups = true }
 
     fun recreateRootNode(): TreeItem<Any> {
         val newRoot = rootItem.recreate(MusicShelf.getAllItems())
@@ -38,6 +39,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
     fun filter(filter: String?) {
         if (filter.isNullOrBlank()) {
             this.filter = null
+            filteredRootItem.forgetExpandedGroups()
             treeView.root = rootItem.treeItem
         } else {
             this.filter = ShelfItemFilter(ShelfItemFilterDataParser.parseFilter(filter))
@@ -60,11 +62,17 @@ class ShelfTreeRootItem {
     var treeItem: TreeItem<Any>? = null
         private set
 
+    var alwaysRememberExpandedGroups: Boolean = false
+    private val expandedGroups = mutableSetOf<String>()
+
     private val groupItems = mutableMapOf<String, TreeItem<Any>>()
     private val itemsByGroup = mutableMapOf<String, MutableList<TreeItem<Any>>>()
 
     fun recreate(items: Collection<ShelfItem>): TreeItem<Any> {
         treeItem = null
+        if (!alwaysRememberExpandedGroups) {
+            expandedGroups.clear()
+        }
         groupItems.clear()
         itemsByGroup.clear()
 
@@ -104,11 +112,28 @@ class ShelfTreeRootItem {
      * If the TreeItem does not exist it is created and added to the TreeView.
      */
     private fun getGroupItem(group: String, rootNode: TreeItem<Any>): TreeItem<Any> {
+        fun TreeItem<Any>.trackAndRestoreExpansion() {
+            val itemGroup = this.value as String
+            this.expandedProperty().addListener(WeakChangeListener { _, _, newValue ->
+                if (newValue) {
+                    expandedGroups.add(itemGroup)
+                } else {
+                    expandedGroups.remove(itemGroup)
+                }
+            })
+            this.isExpanded = expandedGroups.contains(itemGroup)
+        }
+
         if (group == "/") {
             groupItems["/"] = rootNode
             return rootNode
         } else if (!group.contains('/')) {
-            return groupItems.computeIfAbsent(group) { TreeItem<Any>(group).apply { addChildAndSort(rootNode, this) } }
+            return groupItems.computeIfAbsent(group) {
+                TreeItem<Any>(group).apply {
+                    addChildAndSort(rootNode, this)
+                    trackAndRestoreExpansion()
+                }
+            }
         } else {
             var previousSlash = 0
             var childGroupItem: TreeItem<Any> = rootNode
@@ -119,7 +144,10 @@ class ShelfTreeRootItem {
                 val groupPath = group.substring(0, nextGroupEnd)
                 childGroupItem = groupItems.computeIfAbsent(groupPath) {
                     val groupName = group.substring(previousSlash, nextGroupEnd)
-                    TreeItem<Any>(groupName).apply { addChildAndSort(childGroupItem, this) }
+                    TreeItem<Any>(groupName).apply {
+                        addChildAndSort(childGroupItem, this)
+                        trackAndRestoreExpansion()
+                    }
                 }
 
                 if (nextSlash == -1) {
@@ -172,6 +200,10 @@ class ShelfTreeRootItem {
 
     fun removeItem(shelfItem: ShelfItem) {
         removeFromGroups(shelfItem)
+    }
+
+    fun forgetExpandedGroups() {
+        expandedGroups.clear()
     }
 }
 

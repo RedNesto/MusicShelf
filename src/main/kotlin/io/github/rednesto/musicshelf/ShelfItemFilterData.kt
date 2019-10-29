@@ -1,19 +1,39 @@
 package io.github.rednesto.musicshelf
 
-data class ShelfItemFilterData(val keywords: Set<String>, val infoToSearch: Map<String, String?>)
+import io.github.rednesto.musicshelf.utils.isRootGroup
+import io.github.rednesto.musicshelf.utils.normalizeGroup
+
+data class ShelfItemFilterData(val keywords: Set<String>, val groups: Set<String>, val info: Map<String, String?>)
 
 object ShelfItemFilterDataParser {
     /**
      * See ShelfItemFilterParserTest to get an idea of what is expected of this parser
      */
     fun parseFilter(filter: String): ShelfItemFilterData {
+        val trimmedFilter = filter.trim()
         val keywords = mutableSetOf<String>()
-        val infoToSearch: MutableMap<String, String?> = mutableMapOf()
+        val groups = mutableSetOf<String>()
+        val info: MutableMap<String, String?> = mutableMapOf()
 
         var isInQuote = false
         val currentWord = StringBuilder()
         var pendingInfoKey: String? = null
-        for (c in filter) {
+        val group = StringBuilder()
+
+        fun addGroup(rawGroup: String) {
+            var groupToAdd = normalizeGroup(rawGroup)
+            if (isRootGroup(groupToAdd)) {
+                groups.add("/")
+                return
+            }
+
+            if (rawGroup.endsWith('/')) {
+                groupToAdd += '/'
+            }
+            groups.add(groupToAdd)
+        }
+
+        for (c in trimmedFilter) {
             if (c == '"') {
                 isInQuote = !isInQuote
                 continue
@@ -32,19 +52,40 @@ object ShelfItemFilterDataParser {
                 continue
             }
 
+            if (c == '/' && pendingInfoKey == null) {
+                if (currentWord.isNotEmpty()) {
+                    group.append(currentWord)
+                    currentWord.clear()
+                }
+                group.append('/')
+                continue
+            }
+
             if (c.isWhitespace()) {
                 if (pendingInfoKey != null) {
                     if (currentWord.isEmpty()) {
-                        infoToSearch[pendingInfoKey] = null
+                        info[pendingInfoKey] = null
                     } else {
-                        infoToSearch[pendingInfoKey] = currentWord.toString()
+                        info[pendingInfoKey] = currentWord.toString()
+                        currentWord.clear()
                     }
 
                     pendingInfoKey = null
-                } else {
-                    keywords.add(currentWord.toString())
                 }
-                currentWord.clear()
+
+                if (group.isNotEmpty()) {
+                    if (!group.startsWith('/')) {
+                        group.append('/')
+                    }
+                    addGroup(group.append(currentWord).toString())
+                    currentWord.clear()
+                    group.clear()
+                }
+
+                if (currentWord.isNotEmpty()) {
+                    keywords.add(currentWord.toString())
+                    currentWord.clear()
+                }
                 continue
             }
 
@@ -53,17 +94,38 @@ object ShelfItemFilterDataParser {
 
         if (currentWord.isNotEmpty()) {
             if (pendingInfoKey != null) {
-                infoToSearch[pendingInfoKey] = currentWord.toString()
+                info[pendingInfoKey] = currentWord.toString()
                 pendingInfoKey = null
-            } else {
+                currentWord.clear()
+            }
+
+            if (currentWord.isNotEmpty()) {
+                val currentWordString = currentWord.toString()
+                if (group.isNotEmpty()) {
+                    if (!group.startsWith('/')) {
+                        group.append('/')
+                    }
+                    group.append(currentWordString)
+                    currentWord.clear()
+                } else if (currentWordString.contains('/')) {
+                    addGroup(currentWordString)
+                    currentWord.clear()
+                }
+            }
+
+            if (currentWord.isNotEmpty()) {
                 keywords.add(currentWord.toString())
             }
         }
 
-        if (pendingInfoKey != null) {
-            infoToSearch[pendingInfoKey] = null
+        if (group.isNotEmpty()) {
+            addGroup(group.toString())
         }
 
-        return ShelfItemFilterData(keywords, infoToSearch)
+        if (pendingInfoKey != null) {
+            info[pendingInfoKey] = null
+        }
+
+        return ShelfItemFilterData(keywords, groups, info)
     }
 }

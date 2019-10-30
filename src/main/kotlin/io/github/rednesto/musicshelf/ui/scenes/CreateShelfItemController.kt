@@ -31,8 +31,6 @@ open class CreateShelfItemController @JvmOverloads constructor(
     var result: ShelfItem? = null
         private set
 
-    open val createButtonTextKey = "create.shelf_item.create"
-
     @FXML
     lateinit var filePathTextField: TextField
 
@@ -176,8 +174,6 @@ open class CreateShelfItemController @JvmOverloads constructor(
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        createButton.text = resources?.getString(createButtonTextKey) ?: createButtonTextKey
-
         filePathTextField.textProperty().addListener { _, _, newValue ->
             createButton.isDisable = newValue.isNullOrBlank()
         }

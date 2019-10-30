@@ -162,23 +162,36 @@ class ShelfTreeRootItem {
     }
 
     private fun addToGroups(shelfItem: ShelfItem, additionalAction: ((shelfTreeItem: TreeItem<Any>, group: String) -> Unit)? = null) {
-        shelfItem.groups.forEach { group ->
+        val addAction: (String) -> Unit = { group ->
             val normalizedGroup = normalizeGroup(group)
             val shelfTreeItem: TreeItem<Any> = TreeItem(shelfItem)
             itemsByGroup.computeIfAbsent(normalizedGroup) { mutableListOf() }
                     .addIfAbsent(shelfTreeItem)
             additionalAction?.invoke(shelfTreeItem, normalizedGroup)
         }
+
+        if (shelfItem.groups.isEmpty()) {
+            addAction("/")
+        } else {
+            shelfItem.groups.forEach(addAction)
+        }
     }
 
     private fun removeFromGroups(shelfItem: ShelfItem) {
-        shelfItem.groups.forEach { group ->
+        val removeAction: (String) -> Unit = { group ->
             val normalizedGroup = normalizeGroup(group)
-            val groupItem = groupItems[normalizedGroup] ?: return@forEach
-            groupItem.children.removeIf { (it.value as? ShelfItem)?.id == shelfItem.id }
-            if (groupItem.children.isEmpty()) {
-                groupItem.parent?.children?.remove(groupItem)
+            groupItems[normalizedGroup]?.let { groupItem ->
+                groupItem.children.removeIf { (it.value as? ShelfItem)?.id == shelfItem.id }
+                if (groupItem.children.isEmpty()) {
+                    groupItem.parent?.children?.remove(groupItem)
+                }
             }
+        }
+
+        if (shelfItem.groups.isEmpty()) {
+            removeAction("/")
+        } else {
+            shelfItem.groups.forEach(removeAction)
         }
     }
 

@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
@@ -69,13 +70,16 @@
           <Text text="%create.shelf_item.group.placeholder" />
         </placeholder>
       </ListView>
-      <HBox spacing="10.0" VBox.vgrow="NEVER">
-        <Button onAction="#addGroupButton_onAction" text="%create.shelf_item.group.add" />
-        <Button onAction="#removeGroupButton_onAction" text="%create.shelf_item.group.remove" />
+      <VBox spacing="5.0" VBox.vgrow="NEVER">
         <VBox.margin>
           <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
         </VBox.margin>
-      </HBox>
+        <CheckBox fx:id="addToRootCheckbox" mnemonicParsing="false" text="%create.shelf_item.group.add_to_root" />
+        <HBox spacing="10.0">
+          <Button onAction="#addGroupButton_onAction" text="%create.shelf_item.group.add" />
+          <Button onAction="#removeGroupButton_onAction" text="%create.shelf_item.group.remove" />
+        </HBox>
+      </VBox>
     </VBox>
   </SplitPane>
   <ButtonBar GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">

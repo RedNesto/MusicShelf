@@ -6,6 +6,7 @@ import io.github.rednesto.musicshelf.ShelfItemFactory
 import io.github.rednesto.musicshelf.ShelfItemInfoKeys
 import io.github.rednesto.musicshelf.utils.*
 import javafx.beans.property.ReadOnlyStringWrapper
+import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -106,6 +107,9 @@ open class CreateShelfItemController @JvmOverloads constructor(
     }
 
     @FXML
+    lateinit var addToRootCheckbox: CheckBox
+
+    @FXML
     fun addGroupButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val groupName = changeInfoKeyIfNeeded(MusicShelfBundle.get("create.shelf_item.group.default_name"), itemGroupsListView.items)
         itemGroupsListView.items.add(groupName)
@@ -150,8 +154,15 @@ open class CreateShelfItemController @JvmOverloads constructor(
         }
 
 
-        val groups = if (itemGroupsListView.items.isNotEmpty()) normalizeGroups(itemGroupsListView.items) else listOf("/")
-        result = createItem(itemPath, groups, itemInfoTableView.items.toMap())
+        val groups = mutableSetOf<String>()
+        if (itemGroupsListView.items.isNotEmpty()) {
+            groups.addAll(normalizeGroups(itemGroupsListView.items))
+        }
+        if (addToRootCheckbox.isSelected) {
+            groups.add("/")
+        }
+
+        result = createItem(itemPath, groups.toList(), itemInfoTableView.items.toMap())
 
         filePathTextField.scene.window.hide()
     }
@@ -197,6 +208,7 @@ open class CreateShelfItemController @JvmOverloads constructor(
         itemGroupsListView.setOnEditCommit { event ->
             val newGroup = normalizeGroup(event.newValue)
             if (isRootGroup(newGroup)) {
+                addToRootCheckbox.isSelected = true
                 itemGroupsListView.items.removeAt(event.index)
             } else {
                 val oldValue = itemGroupsListView.items[event.index]
@@ -208,6 +220,7 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
             event.consume()
         }
+        itemGroupsListView.items.addListener(ListChangeListener { addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty() })
 
         if (initialFile != null) {
             val absoluteInitialPath = initialFile.toAbsolutePath()
@@ -220,8 +233,9 @@ open class CreateShelfItemController @JvmOverloads constructor(
         }
 
         val sanitizedInitialGroups = initialGroups.toMutableSet()
-        sanitizedInitialGroups.removeAll { isRootGroup(it) }
+        addToRootCheckbox.isSelected = sanitizedInitialGroups.removeAll { isRootGroup(it) }
         itemGroupsListView.items.addAll(sanitizedInitialGroups)
+        addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty()
     }
 
     private fun changeInfoKeyIfNeeded(originalKey: String, existingKeys: Collection<String>): String {

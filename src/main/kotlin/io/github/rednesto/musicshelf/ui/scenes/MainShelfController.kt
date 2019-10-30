@@ -126,7 +126,8 @@ class MainShelfController : Initializable {
                     }
                 }
                 shelfTreeView.selectionModel.selectedItems.forEach(::openItem)
-            }
+            },
+            KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_ANY) to Runnable { shelfSearchTextField.requestFocus() }
     )
 
     private val shelfChangeListener = MusicShelfChangeListener()

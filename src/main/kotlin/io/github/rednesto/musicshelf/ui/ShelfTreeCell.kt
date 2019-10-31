@@ -40,6 +40,7 @@ class ShelfTreeCell : TreeCell<Any>() {
                 is String -> {
                     text = item // It is a group
                     addDragHandlers()
+                    onContextMenuRequested = null
                 }
                 is ShelfItem -> {
                     graphic = node
@@ -49,6 +50,7 @@ class ShelfTreeCell : TreeCell<Any>() {
                 else -> {
                     // TODO log/report this, we should never reach this branch
                     removeDragHandlers()
+                    onContextMenuRequested = null
                 }
             }
         }
@@ -140,7 +142,7 @@ class ShelfTreeCell : TreeCell<Any>() {
             name.text = item.nameOrUnnamed
             path.text = item.path.toAbsolutePath().toString()
             path.style = if (Files.notExists(item.path)) "-fx-fill: red" else null
-            this@ShelfTreeCell.setOnContextMenuRequested { paneContextMenu.show(node, it.screenX, it.screenY) }
+            this@ShelfTreeCell.setOnContextMenuRequested { paneContextMenu.show(this@ShelfTreeCell, it.screenX, it.screenY) }
         }
     }
 }

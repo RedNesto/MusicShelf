@@ -85,7 +85,7 @@ class ShelfTreeCell : TreeCell<Any>() {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
-                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, groups, lockPath = true)) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, groups)) }
         event.isDropCompleted = true
         event.consume()
     }
@@ -139,7 +139,8 @@ class ShelfTreeCell : TreeCell<Any>() {
             this.item = item
             name.text = item.nameOrUnnamed
             path.text = item.path.toAbsolutePath().toString()
-            node.setOnContextMenuRequested { paneContextMenu.show(node, it.screenX, it.screenY) }
+            path.style = if (Files.notExists(item.path)) "-fx-fill: red" else null
+            this@ShelfTreeCell.setOnContextMenuRequested { paneContextMenu.show(node, it.screenX, it.screenY) }
         }
     }
 }

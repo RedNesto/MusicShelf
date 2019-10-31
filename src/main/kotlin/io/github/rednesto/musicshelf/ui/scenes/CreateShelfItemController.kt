@@ -19,6 +19,7 @@ import javafx.stage.FileChooser
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 open class CreateShelfItemController @JvmOverloads constructor(
@@ -41,6 +42,15 @@ open class CreateShelfItemController @JvmOverloads constructor(
     fun selectFileButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val chooser = FileChooser().apply {
             title = MusicShelfBundle.get("create.shelf_item.select_file.title")
+            if (!filePathTextField.text.isNullOrBlank()) {
+                val currentPath = Paths.get(filePathTextField.text).toAbsolutePath()
+                if (Files.isDirectory(currentPath)) {
+                    initialDirectory = currentPath.toFile()
+                } else if (Files.isRegularFile(currentPath)) {
+                    initialDirectory = currentPath.parent?.toFile()
+                    initialFileName = currentPath.fileName.toString()
+                }
+            }
         }
 
         val selectedFile = chooser.showOpenDialog(null) ?: return

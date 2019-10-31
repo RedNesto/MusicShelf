@@ -67,7 +67,7 @@ class MainShelfController : Initializable {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
-                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, lockPath = true)) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file)) }
         event.isDropCompleted = true
         event.consume()
     }

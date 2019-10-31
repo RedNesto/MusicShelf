@@ -1,13 +1,18 @@
 package io.github.rednesto.musicshelf
 
 import io.github.rednesto.musicshelf.serialization.ShelfItemStorage
+import javafx.collections.FXCollections
+import javafx.collections.ObservableSet
 import java.nio.file.Path
 import java.util.*
+import kotlin.collections.HashSet
 
 object MusicShelf {
 
     private val items: MutableMap<UUID, ShelfItem> = mutableMapOf()
     private val changeListeners: MutableSet<ChangeListener> = mutableSetOf()
+    private val allGroupsMutable: ObservableSet<String> = FXCollections.observableSet()
+    val allGroups: ObservableSet<String> = FXCollections.unmodifiableObservableSet(allGroupsMutable)
 
     fun getItem(itemId: UUID): ShelfItem? = items[itemId]
 
@@ -18,6 +23,7 @@ object MusicShelf {
         } else {
             changeListeners.forEach { it.onItemAdded(item) }
         }
+        allGroupsMutable.addAll(item.groups)
     }
 
     fun removeItem(itemId: UUID) {
@@ -40,13 +46,27 @@ object MusicShelf {
     }
 
     fun load(filePath: Path = ShelfItemStorage.DEFAULT_FILE_PATH) {
+        clear()
         val loadedItems = ShelfItemStorage.load(filePath).associateBy(ShelfItem::id)
-        items.clear()
-        items.putAll(loadedItems)
+        loadedItems.values.forEach(::addItem)
     }
 
     fun save(filePath: Path = ShelfItemStorage.DEFAULT_FILE_PATH) {
         ShelfItemStorage.save(items.values.toList(), filePath)
+    }
+
+    fun forgetUnusedGroups() {
+        val existingGroups = mutableSetOf<String>()
+        items.values.forEach { existingGroups.addAll(it.groups) }
+        allGroupsMutable.removeIf { !existingGroups.contains(it) }
+    }
+
+    private fun clear() {
+        val allKeys = HashSet(items.keys)
+        allKeys.forEach(::removeItem)
+        check(items.isEmpty()) { "There should be no items left" }
+
+        allGroupsMutable.clear()
     }
 
     interface ChangeListener {

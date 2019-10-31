@@ -1,17 +1,14 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
-import io.github.rednesto.musicshelf.MusicShelfBundle
-import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.ShelfItemFactory
-import io.github.rednesto.musicshelf.ShelfItemInfoKeys
+import io.github.rednesto.musicshelf.*
 import io.github.rednesto.musicshelf.utils.*
 import javafx.beans.property.ReadOnlyStringWrapper
-import javafx.collections.ListChangeListener
+import javafx.collections.*
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
-import javafx.scene.control.cell.TextFieldListCell
+import javafx.scene.control.cell.ComboBoxListCell
 import javafx.scene.control.cell.TextFieldTableCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -28,6 +25,16 @@ open class CreateShelfItemController @JvmOverloads constructor(
         val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
         val lockPath: Boolean = false
 ) : Initializable {
+
+    private val availableGroups: ObservableList<String> = FXCollections.observableArrayList()
+    // We keep a strong reference here because we only use it wrapped in a Weak*Listener
+    private val availableGroupsUpdaterSet: SetChangeListener<String> = SetChangeListener { change ->
+        val added = change.elementAdded
+        if (added != null && !itemGroupsListView.items.contains(added) && !isRootGroup(added)) {
+            availableGroups.addIfAbsent(added)
+        }
+        availableGroups.sort()
+    }
 
     var result: ShelfItem? = null
         private set
@@ -210,7 +217,7 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
         itemGroupsLabel.labelFor = itemGroupsListView
         itemGroupsListView.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        itemGroupsListView.cellFactory = TextFieldListCell.forListView()
+        itemGroupsListView.setCellFactory { ComboBoxListCell(availableGroups).apply { isComboBoxEditable = true } }
         itemGroupsListView.setOnEditCommit { event ->
             val newGroup = normalizeGroup(event.newValue)
             if (isRootGroup(newGroup)) {
@@ -227,6 +234,13 @@ open class CreateShelfItemController @JvmOverloads constructor(
             event.consume()
         }
         itemGroupsListView.items.addListener(ListChangeListener { addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty() })
+        itemGroupsListView.items.addListener(ListChangeListener { change ->
+            while (change.next()) {
+                change.addedSubList.forEach { availableGroups.remove(it) }
+                change.removed.forEach { availableGroups.addIfAbsent(it) }
+            }
+            availableGroups.sort()
+        })
 
         if (initialFile != null) {
             val absoluteInitialPath = initialFile.toAbsolutePath()
@@ -242,6 +256,12 @@ open class CreateShelfItemController @JvmOverloads constructor(
         addToRootCheckbox.isSelected = sanitizedInitialGroups.removeAll { isRootGroup(it) }
         itemGroupsListView.items.addAll(sanitizedInitialGroups)
         addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty()
+
+        MusicShelf.allGroups.addListener(WeakSetChangeListener(availableGroupsUpdaterSet))
+        availableGroups.addAll(MusicShelf.allGroups)
+        availableGroups.removeAll(itemGroupsListView.items)
+        availableGroups.remove("/")
+        availableGroups.sort()
     }
 
     private fun changeInfoKeyIfNeeded(originalKey: String, existingKeys: Collection<String>): String {

@@ -17,7 +17,7 @@ class ShelfItemFilter(val filterData: ShelfItemFilterData) : Predicate<ShelfItem
             }
         }
         val matchesInfo = filterData.info.isEmpty() || filterData.info.any { entry ->
-            if (entry.value == null) t.infos.containsKey(entry.key) else t.infos[entry.key] == entry.value
+            if (entry.value == null) t.info.containsKey(entry.key) else t.info[entry.key] == entry.value
         }
         return matchesKeywords && matchesGroups && matchesInfo
     }

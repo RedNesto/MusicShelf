@@ -52,7 +52,7 @@ class ShelfItemDetailsController(val item: ShelfItem) : Initializable {
         infoKeyColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.first) }
         infoValueColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.second) }
 
-        item.infos.forEach { infoTableView.items.add(it.toPair()) }
+        item.info.forEach { infoTableView.items.add(it.toPair()) }
 
         showInExplorerButton.isDisable = !DesktopHelper.supportsShow()
     }

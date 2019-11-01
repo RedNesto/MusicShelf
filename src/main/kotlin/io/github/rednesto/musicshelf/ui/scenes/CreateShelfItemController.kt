@@ -21,7 +21,7 @@ import java.util.*
 
 open class CreateShelfItemController @JvmOverloads constructor(
         val initialFile: Path? = null,
-        val initialGroups: List<String> = emptyList(),
+        val initialGroups: Set<String> = emptySet(),
         val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
         val lockPath: Boolean = false
 ) : Initializable {
@@ -177,12 +177,12 @@ open class CreateShelfItemController @JvmOverloads constructor(
             groups.add("/")
         }
 
-        result = createItem(itemPath, groups.toList(), itemInfoTableView.items.toMap())
+        result = createItem(itemPath, groups, itemInfoTableView.items.toMap())
 
         filePathTextField.scene.window.hide()
     }
 
-    protected open fun createItem(itemPath: Path, groups: List<String>, info: Map<String, String>) =
+    protected open fun createItem(itemPath: Path, groups: Set<String>, info: Map<String, String>) =
             ShelfItemFactory.create(itemPath, groups, info)
 
     @FXML

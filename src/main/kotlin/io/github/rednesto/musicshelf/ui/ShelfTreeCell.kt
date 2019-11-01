@@ -59,7 +59,7 @@ class ShelfTreeCell : TreeCell<Any>() {
     private fun addDragHandlers() {
         setOnDragOver { dragOverHandler(it) }
         setOnDragExited { dragExitedHandler() }
-        setOnDragDropped { dragDroppedHandler(it, mutableListOf(treeItem.group(text))) }
+        setOnDragDropped { dragDroppedHandler(it, setOf(treeItem.group(text))) }
     }
 
     private fun removeDragHandlers() {
@@ -83,7 +83,7 @@ class ShelfTreeCell : TreeCell<Any>() {
         this@ShelfTreeCell.styleClass.removeAll("drag-over-highlight-cell")
     }
 
-    private fun dragDroppedHandler(event: DragEvent, groups: MutableList<String>) {
+    private fun dragDroppedHandler(event: DragEvent, groups: Set<String>) {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
@@ -134,7 +134,7 @@ class ShelfTreeCell : TreeCell<Any>() {
 
         @FXML
         fun onDragDropped(event: DragEvent) {
-            dragDroppedHandler(event, mutableListOf(this@ShelfTreeCell.treeItem.group()))
+            dragDroppedHandler(event, setOf(this@ShelfTreeCell.treeItem.group()))
         }
 
         fun update(item: ShelfItem) {

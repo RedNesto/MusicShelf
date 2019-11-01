@@ -4,13 +4,12 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.reflect.KProperty
+import kotlin.collections.HashSet
 
-data class ShelfItem(val id: UUID, val path: Path, val infos: MutableMap<String, String>, val groups: MutableList<String>)
+data class ShelfItem(val id: UUID, val path: Path, val info: Map<String, String>, val groups: Set<String>)
 
-var ShelfItem.name: String? by ShelfItemInfoDelegate(ShelfItemInfoKeys.NAME)
-val ShelfItem.nameOrUnnamed: String
-    get() = this.name ?: MusicShelfBundle.get("shelf.item.unnamed")
+val ShelfItem.name: String? get() = this.info[ShelfItemInfoKeys.NAME]
+val ShelfItem.nameOrUnnamed: String get() = this.name ?: MusicShelfBundle.get("shelf.item.unnamed")
 
 object ShelfItemInfoKeys {
     const val NAME = "name"
@@ -22,26 +21,14 @@ object ShelfItemInfoKeys {
     )
 }
 
-class ShelfItemInfoDelegate(private val infoKey: String) {
-    operator fun getValue(backed: ShelfItem, property: KProperty<*>): String? {
-        return backed.infos[infoKey]
-    }
-
-    operator fun setValue(backed: ShelfItem, property: KProperty<*>, value: String?) {
-        if (value == null) {
-            backed.infos.remove(ShelfItemInfoKeys.NAME)
-        } else {
-            backed.infos[ShelfItemInfoKeys.NAME] = value
-        }
-    }
-}
-
 object ShelfItemFactory {
-    fun create(path: Path, groups: List<String> = emptyList(), additionalInfos: Map<String, String> = emptyMap()): ShelfItem {
+    fun create(path: Path, groups: Set<String> = emptySet(), info: Map<String, String> = emptyMap()): ShelfItem {
         if (!Files.isRegularFile(path)) {
             throw IllegalStateException("Cannot create a ShelfItem whose path does not exists or is not a file.")
         }
 
-        return ShelfItem(UUID.randomUUID(), path.toAbsolutePath(), HashMap(additionalInfos), ArrayList(groups))
+        val unmodifiableInfo = Collections.unmodifiableMap(HashMap(info))
+        val unmodifiableGroups = Collections.unmodifiableSet(HashSet(groups))
+        return ShelfItem(UUID.randomUUID(), path.toAbsolutePath(), unmodifiableInfo, unmodifiableGroups)
     }
 }

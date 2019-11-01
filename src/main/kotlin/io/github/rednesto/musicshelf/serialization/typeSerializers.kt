@@ -19,9 +19,9 @@ class ShelfItemTypeSerializer : TypeSerializer<ShelfItem> {
         val id = UUID.fromString(value.getNode("id").string ?: return null)
         val path = Paths.get(value.getNode("path").string ?: return null)
         val info = (value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null)
-        val groups = value.getNode("groups").getList(TypeTokens.STRING).filterTo(mutableListOf()) { !it.isNullOrEmpty() }
+        val groups = value.getNode("groups").getList(TypeTokens.STRING).filter { !it.isNullOrEmpty() }
 
-        return ShelfItem(id, path, info.toMutableMap(), groups)
+        return ShelfItem(id, path, info, groups.toSet())
     }
 
     override fun serialize(type: TypeToken<*>, obj: ShelfItem?, value: ConfigurationNode) {
@@ -31,7 +31,7 @@ class ShelfItemTypeSerializer : TypeSerializer<ShelfItem> {
 
         value.getNode("id").value = obj.id.toString()
         value.getNode("path").value = obj.path.toAbsolutePath().toString()
-        value.getNode("info").value = obj.infos
+        value.getNode("info").value = obj.info
         value.getNode("groups").value = obj.groups
     }
 }

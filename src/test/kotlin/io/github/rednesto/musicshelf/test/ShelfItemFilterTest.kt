@@ -70,7 +70,7 @@ class ShelfItemFilterTest {
 
     private fun createItem(name: String, groups: Set<String>, vararg info: Pair<String, String>): ShelfItem {
         val infoMap = info.toMap(mutableMapOf(ShelfItemInfoKeys.NAME to name))
-        return ShelfItem(UUID.randomUUID(), Paths.get(""), infoMap, groups.toMutableList())
+        return ShelfItem(UUID.randomUUID(), Paths.get(""), infoMap, groups)
     }
 
     private fun getItems(vararg indices: Int): List<ShelfItem> {

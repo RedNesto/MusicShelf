@@ -30,10 +30,11 @@ class ShelfTreeCell : TreeCell<Any>() {
     override fun updateItem(item: Any?, empty: Boolean) {
         super.updateItem(item, empty)
 
+        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+        text = null // Somehow Kotlin doesn't like this
+        graphic = null
+
         if (empty || item == null) {
-            @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-            text = null // Somehow Kotlin doesn't like this
-            graphic = null
             removeDragHandlers()
         } else {
             when (item) {

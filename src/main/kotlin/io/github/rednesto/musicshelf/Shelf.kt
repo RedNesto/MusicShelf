@@ -50,8 +50,7 @@ class Shelf(val name: String, val directory: Path) {
 
     fun load() {
         clear()
-        val loadedItems = ShelfItemStorage.load(itemsStoragePath).associateBy(ShelfItem::id)
-        loadedItems.values.forEach(::addItem)
+        ShelfItemStorage.load(itemsStoragePath).forEach(::addItem)
     }
 
     fun save() {

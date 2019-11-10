@@ -101,7 +101,7 @@ class Shelf(val name: String, val directory: Path) {
 
     fun save() {
         ShelfItemStorage.save(items.values.toList(), itemsStoragePath)
-        ProjectStorage.save(projects.values.toList(), itemsStoragePath)
+        ProjectStorage.save(projects.values.toList(), projectsStoragePath)
     }
 
     fun forgetUnusedGroups() {

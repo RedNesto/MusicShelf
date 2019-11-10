@@ -17,6 +17,7 @@ object TypeTokens {
     val SHELF_ITEM: TypeToken<ShelfItem> = TypeToken.of(ShelfItem::class.java)
     val SHELF_ITEM_LIST: TypeToken<List<ShelfItem>> = object : TypeToken<List<ShelfItem>>() {}
     val PROJECT: TypeToken<Project> = TypeToken.of(Project::class.java)
+    val PROJECT_LIST: TypeToken<List<Project>> = object : TypeToken<List<Project>>() {}
 }
 
 class ShelfItemTypeSerializer : TypeSerializer<ShelfItem> {

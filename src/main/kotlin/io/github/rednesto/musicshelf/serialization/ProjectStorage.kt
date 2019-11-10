@@ -18,7 +18,7 @@ object ProjectStorage {
 
     fun save(projects: List<Project>, filePath: Path) {
         val configLoader = createLoader(filePath)
-        val nodeToSave = configLoader.createEmptyNode().setValue(projects)
+        val nodeToSave = configLoader.createEmptyNode().setValue(TypeTokens.PROJECT_LIST, projects)
         configLoader.save(nodeToSave)
     }
 

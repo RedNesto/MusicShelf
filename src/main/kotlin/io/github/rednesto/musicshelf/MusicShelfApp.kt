@@ -1,9 +1,7 @@
 package io.github.rednesto.musicshelf
 
-import io.github.rednesto.musicshelf.ui.scenes.ShelfViewController
-import io.github.rednesto.musicshelf.utils.configureFxmlLoader
+import io.github.rednesto.musicshelf.ui.ShelfViewWindow
 import javafx.application.Application
-import javafx.scene.Scene
 import javafx.stage.Stage
 import java.nio.file.Paths
 
@@ -12,18 +10,13 @@ class MusicShelfApp : Application() {
     override fun init() {
         app = this
 
+        // TODO support multiple shelves
         val mainShelfPath = Paths.get("").toAbsolutePath()
-        mainShelf = Shelf(mainShelfPath).apply(Shelf::load)
+        mainShelf = Shelf("Main Shelf", mainShelfPath).apply(Shelf::load)
     }
 
     override fun start(primaryStage: Stage) {
-        primaryStage.apply {
-            title = "MusicShelf"
-            val fxmlLoader = configureFxmlLoader("/ui/scenes/ShelfView.fxml", resources = MusicShelfBundle.getBundle())
-            fxmlLoader.setControllerFactory { ShelfViewController(mainShelf) }
-            scene = Scene(fxmlLoader.load())
-            show()
-        }
+        ShelfViewWindow.create(mainShelf, primaryStage).show()
     }
 
     override fun stop() {

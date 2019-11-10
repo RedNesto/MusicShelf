@@ -7,7 +7,7 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.collections.HashSet
 
-class Shelf(val directory: Path) {
+class Shelf(val name: String, val directory: Path) {
 
     private val itemsStoragePath = directory.resolve(ShelfItemStorage.DEFAULT_FILE_NAME)
 

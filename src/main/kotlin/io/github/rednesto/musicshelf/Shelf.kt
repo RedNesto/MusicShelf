@@ -12,7 +12,8 @@ class Shelf(val name: String, val directory: Path) {
     private val itemsStoragePath = directory.resolve(ShelfItemStorage.DEFAULT_FILE_NAME)
 
     private val items: MutableMap<UUID, ShelfItem> = mutableMapOf()
-    private val changeListeners: MutableSet<ChangeListener> = mutableSetOf()
+    private val itemsChangeListeners: MutableSet<ChangeListener<ShelfItem>> = mutableSetOf()
+
     private val allGroupsMutable: ObservableSet<String> = FXCollections.observableSet()
     val allGroups: ObservableSet<String> = FXCollections.unmodifiableObservableSet(allGroupsMutable)
 
@@ -21,9 +22,9 @@ class Shelf(val name: String, val directory: Path) {
     fun addItem(item: ShelfItem) {
         val previousItem = items.put(item.id, item)
         if (previousItem != null) {
-            changeListeners.forEach { it.onItemReplaced(previousItem, item) }
+            itemsChangeListeners.forEach { it.onItemReplaced(previousItem, item) }
         } else {
-            changeListeners.forEach { it.onItemAdded(item) }
+            itemsChangeListeners.forEach { it.onItemAdded(item) }
         }
         allGroupsMutable.addAll(item.groups)
     }
@@ -31,7 +32,7 @@ class Shelf(val name: String, val directory: Path) {
     fun removeItem(itemId: UUID) {
         val removedItem = items.remove(itemId)
         if (removedItem != null) {
-            changeListeners.forEach { it.onItemRemoved(removedItem) }
+            itemsChangeListeners.forEach { it.onItemRemoved(removedItem) }
         }
     }
 
@@ -39,12 +40,12 @@ class Shelf(val name: String, val directory: Path) {
         return items.values
     }
 
-    fun addChangeListener(listener: ChangeListener) {
-        changeListeners.add(listener)
+    fun addItemChangeListener(listener: ChangeListener<ShelfItem>) {
+        itemsChangeListeners.add(listener)
     }
 
-    fun removeChangeListener(listener: ChangeListener) {
-        changeListeners.remove(listener)
+    fun removeItemChangeListener(listener: ChangeListener<ShelfItem>) {
+        itemsChangeListeners.remove(listener)
     }
 
     fun load() {
@@ -71,27 +72,27 @@ class Shelf(val name: String, val directory: Path) {
         allGroupsMutable.clear()
     }
 
-    interface ChangeListener {
-        fun onItemAdded(added: ShelfItem) = Unit
+    interface ChangeListener<T> {
+        fun onItemAdded(added: T) = Unit
 
-        fun onItemRemoved(removed: ShelfItem) = Unit
+        fun onItemRemoved(removed: T) = Unit
 
-        fun onItemReplaced(oldItem: ShelfItem, newItem: ShelfItem) = Unit
+        fun onItemReplaced(oldItem: T, newItem: T) = Unit
     }
 
-    interface SimpleChangeListener : ChangeListener {
-        override fun onItemAdded(added: ShelfItem) {
+    interface SimpleChangeListener<T> : ChangeListener<T> {
+        override fun onItemAdded(added: T) {
             onItemChange(null, added)
         }
 
-        override fun onItemRemoved(removed: ShelfItem) {
+        override fun onItemRemoved(removed: T) {
             onItemChange(removed, null)
         }
 
-        override fun onItemReplaced(oldItem: ShelfItem, newItem: ShelfItem) {
+        override fun onItemReplaced(oldItem: T, newItem: T) {
             onItemChange(oldItem, newItem)
         }
 
-        fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) = Unit
+        fun onItemChange(oldItem: T?, newItem: T?) = Unit
     }
 }

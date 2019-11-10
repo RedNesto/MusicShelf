@@ -108,7 +108,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
         shelfTreeView.padding = Insets(1.0)
         shelfTreeView.setCellFactory { ShelfTreeCell(shelf) }
         shelfTreeView.sceneProperty().addListener(::onSceneChange)
-        shelf.addChangeListener(shelfChangeListener)
+        shelf.addItemChangeListener(shelfChangeListener)
         shelfTreeViewHelper.recreateRootNode().apply {
             emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty()
             children.addListener(ListChangeListener { emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty() })
@@ -130,7 +130,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
             KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_ANY) to Runnable { shelfSearchTextField.requestFocus() }
     )
 
-    private val shelfChangeListener = MusicShelfChangeListener()
+    private val shelfChangeListener = ShelfItemChangeListener()
 
     private fun onSceneChange(@Suppress("UNUSED_PARAMETER") observable: ObservableValue<out Scene>, oldScene: Scene?, newScene: Scene?) {
         if (oldScene != null) {
@@ -151,10 +151,10 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
 
     private fun onWindowClosed(@Suppress("UNUSED_PARAMETER") event: WindowEvent) {
         shelfTreeView.sceneProperty().removeListener(::onSceneChange)
-        shelf.removeChangeListener(shelfChangeListener)
+        shelf.removeItemChangeListener(shelfChangeListener)
     }
 
-    private inner class MusicShelfChangeListener : Shelf.SimpleChangeListener {
+    private inner class ShelfItemChangeListener : Shelf.SimpleChangeListener<ShelfItem> {
         override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
             if (oldItem != null) {
                 shelfTreeViewHelper.removeItem(oldItem)

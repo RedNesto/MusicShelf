@@ -1,5 +1,6 @@
 package io.github.rednesto.musicshelf
 
+import io.github.rednesto.musicshelf.serialization.ProjectStorage
 import io.github.rednesto.musicshelf.serialization.ShelfItemStorage
 import javafx.collections.FXCollections
 import javafx.collections.ObservableSet
@@ -10,9 +11,13 @@ import kotlin.collections.HashSet
 class Shelf(val name: String, val directory: Path) {
 
     private val itemsStoragePath = directory.resolve(ShelfItemStorage.DEFAULT_FILE_NAME)
+    private val projectsStoragePath = directory.resolve(ProjectStorage.DEFAULT_FILE_NAME)
 
     private val items: MutableMap<UUID, ShelfItem> = mutableMapOf()
     private val itemsChangeListeners: MutableSet<ChangeListener<ShelfItem>> = mutableSetOf()
+
+    private val projects: MutableMap<UUID, Project> = mutableMapOf()
+    private val projectsChangeListeners: MutableSet<ChangeListener<Project>> = mutableSetOf()
 
     private val allGroupsMutable: ObservableSet<String> = FXCollections.observableSet()
     val allGroups: ObservableSet<String> = FXCollections.unmodifiableObservableSet(allGroupsMutable)
@@ -40,6 +45,25 @@ class Shelf(val name: String, val directory: Path) {
         return items.values
     }
 
+    fun getProject(id: UUID): Project? = projects[id]
+
+    fun addProject(project: Project) {
+        val previousProject = projects.put(project.id, project)
+        if (previousProject != null) {
+            projectsChangeListeners.forEach { it.onItemReplaced(previousProject, project) }
+        } else {
+            projectsChangeListeners.forEach { it.onItemAdded(project) }
+        }
+        allGroupsMutable.addAll(project.groups)
+    }
+
+    fun removeProject(projectId: UUID) {
+        val removedProject = projects.remove(projectId)
+        if (removedProject != null) {
+            projectsChangeListeners.forEach { it.onItemRemoved(removedProject) }
+        }
+    }
+
     fun addItemChangeListener(listener: ChangeListener<ShelfItem>) {
         itemsChangeListeners.add(listener)
     }
@@ -59,6 +83,7 @@ class Shelf(val name: String, val directory: Path) {
     fun load() {
         clear()
         ShelfItemStorage.load(itemsStoragePath).forEach(::addItem)
+        ProjectStorage.load(projectsStoragePath).forEach(::addProject)
     }
 
     fun save() {
@@ -75,6 +100,10 @@ class Shelf(val name: String, val directory: Path) {
         val allKeys = HashSet(items.keys)
         allKeys.forEach(::removeItem)
         check(items.isEmpty()) { "There should be no items left" }
+
+        val allProjectKeys = HashSet(projects.keys)
+        allProjectKeys.forEach(::removeProject)
+        check(projects.isEmpty()) { "There should be no projects left" }
 
         allGroupsMutable.clear()
     }

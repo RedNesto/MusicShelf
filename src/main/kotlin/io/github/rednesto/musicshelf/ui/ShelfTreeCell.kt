@@ -1,8 +1,6 @@
 package io.github.rednesto.musicshelf.ui
 
-import io.github.rednesto.musicshelf.MusicShelfBundle
-import io.github.rednesto.musicshelf.Shelf
-import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.*
 import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.addClass
@@ -23,9 +21,11 @@ import java.nio.file.Files
 
 class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
 
-    val controller = ShelfItemController()
+    val shelfItemController = ShelfItemController()
+    val shelfItemNode: Node =  loadFxml("/ui/ShelfItemCell.fxml", shelfItemController, MusicShelfBundle.getBundle())
 
-    val node: Node = loadFxml("/ui/ShelfItemCell.fxml", controller, MusicShelfBundle.getBundle())
+    //val projectController = ShelfItemController()
+    //val projectNode: Node =  loadFxml("/ui/ProjectCell.fxml", projectController, MusicShelfBundle.getBundle())
 
     override fun updateItem(item: Any?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -44,8 +44,12 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
                     onContextMenuRequested = null
                 }
                 is ShelfItem -> {
-                    graphic = node
-                    controller.update(item)
+                    graphic = shelfItemNode
+                    shelfItemController.update(item)
+                    removeDragHandlers()
+                }
+                is Project -> {
+                    text = item.name
                     removeDragHandlers()
                 }
                 else -> {
@@ -145,6 +149,10 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
             path.style = if (Files.notExists(item.path)) "-fx-fill: red" else null
             this@ShelfTreeCell.setOnContextMenuRequested { paneContextMenu.show(this@ShelfTreeCell, it.screenX, it.screenY) }
         }
+    }
+
+    inner class ProjectController {
+
     }
 }
 

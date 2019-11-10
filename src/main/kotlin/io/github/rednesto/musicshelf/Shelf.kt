@@ -45,6 +45,15 @@ class Shelf(val name: String, val directory: Path) {
         return items.values
     }
 
+    fun addItemChangeListener(listener: ChangeListener<ShelfItem>) {
+        itemsChangeListeners.add(listener)
+    }
+
+    fun removeItemChangeListener(listener: ChangeListener<ShelfItem>) {
+        itemsChangeListeners.remove(listener)
+    }
+
+
     fun getProject(id: UUID): Project? = projects[id]
 
     fun addProject(project: Project) {
@@ -64,18 +73,22 @@ class Shelf(val name: String, val directory: Path) {
         }
     }
 
-    fun addItemChangeListener(listener: ChangeListener<ShelfItem>) {
-        itemsChangeListeners.add(listener)
+    fun getAllProjects(): Collection<Project> = projects.values
+
+    fun addProjectChangeListener(listener: ChangeListener<Project>) {
+        projectsChangeListeners.add(listener)
     }
 
-    fun removeItemChangeListener(listener: ChangeListener<ShelfItem>) {
-        itemsChangeListeners.remove(listener)
+    fun removeProjectChangeListener(listener: ChangeListener<Project>) {
+        projectsChangeListeners.remove(listener)
     }
+
 
 
     fun getAllShelvables(): Collection<Shelvable> {
-        val shelvables = HashSet<Shelvable>(items.size)
+        val shelvables = HashSet<Shelvable>(items.size + projects.size)
         shelvables.addAll(items.values)
+        shelvables.addAll(projects.values)
         return shelvables
     }
 
@@ -88,6 +101,7 @@ class Shelf(val name: String, val directory: Path) {
 
     fun save() {
         ShelfItemStorage.save(items.values.toList(), itemsStoragePath)
+        ProjectStorage.save(projects.values.toList(), itemsStoragePath)
     }
 
     fun forgetUnusedGroups() {

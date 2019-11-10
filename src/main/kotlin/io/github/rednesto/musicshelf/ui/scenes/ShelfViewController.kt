@@ -27,7 +27,7 @@ import java.net.URL
 import java.nio.file.Files
 import java.util.*
 
-class MainShelfController(val shelf: Shelf) : Initializable {
+class ShelfViewController(val shelf: Shelf) : Initializable {
 
     @FXML
     lateinit var shelfSearchTextField: TextField

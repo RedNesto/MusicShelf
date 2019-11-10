@@ -1,6 +1,6 @@
 package io.github.rednesto.musicshelf
 
-import io.github.rednesto.musicshelf.ui.scenes.MainShelfController
+import io.github.rednesto.musicshelf.ui.scenes.ShelfViewController
 import io.github.rednesto.musicshelf.utils.configureFxmlLoader
 import javafx.application.Application
 import javafx.scene.Scene
@@ -19,8 +19,8 @@ class MusicShelfApp : Application() {
     override fun start(primaryStage: Stage) {
         primaryStage.apply {
             title = "MusicShelf"
-            val fxmlLoader = configureFxmlLoader("/ui/scenes/MainShelf.fxml", resources = MusicShelfBundle.getBundle())
-            fxmlLoader.setControllerFactory { MainShelfController(mainShelf) }
+            val fxmlLoader = configureFxmlLoader("/ui/scenes/ShelfView.fxml", resources = MusicShelfBundle.getBundle())
+            fxmlLoader.setControllerFactory { ShelfViewController(mainShelf) }
             scene = Scene(fxmlLoader.load())
             show()
         }

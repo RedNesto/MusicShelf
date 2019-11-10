@@ -1,11 +1,11 @@
 package io.github.rednesto.musicshelf.test
 
-import io.github.rednesto.musicshelf.ShelfItemFilterData
-import io.github.rednesto.musicshelf.ShelfItemFilterDataParser
+import io.github.rednesto.musicshelf.ShelvableFilterData
+import io.github.rednesto.musicshelf.ShlevableFilterDataParser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class ShelfItemFilterDataParserTest {
+class ShelvableFilterDataParserTest {
 
     @Test
     fun `by keyword`() {
@@ -54,29 +54,29 @@ class ShelfItemFilterDataParserTest {
 
     @Test
     fun `mixed input`() {
-        doTest(ShelfItemFilterData(setOf("keyword1", "keyword with spaces"), emptySet(), mapOf("key" to "value")), "keyword1 \"keyword with spaces\" key:value")
-        doTest(ShelfItemFilterData(setOf("keyword1", "keyword with spaces"), emptySet(), mapOf("key" to "value", "spaced key" to "the_value")),
+        doTest(ShelvableFilterData(setOf("keyword1", "keyword with spaces"), emptySet(), mapOf("key" to "value")), "keyword1 \"keyword with spaces\" key:value")
+        doTest(ShelvableFilterData(setOf("keyword1", "keyword with spaces"), emptySet(), mapOf("key" to "value", "spaced key" to "the_value")),
                 """keyword1 "keyword with spaces" key:value "spaced key":the_value""")
-        doTest(ShelfItemFilterData(setOf("keyword1", "colon :keyword", "keyword with spaces"), emptySet(), mapOf("key" to "value", "key2" to "colon : value")),
+        doTest(ShelvableFilterData(setOf("keyword1", "colon :keyword", "keyword with spaces"), emptySet(), mapOf("key" to "value", "key2" to "colon : value")),
                 """keyword1 "keyword with spaces" key:value "colon :keyword" key2:"colon : value"""")
-        doTest(ShelfItemFilterData(setOf("keyword1", "keyword2"), emptySet(), mapOf("key1" to null, "key2" to "value2", "key3" to null)),
+        doTest(ShelvableFilterData(setOf("keyword1", "keyword2"), emptySet(), mapOf("key1" to null, "key2" to "value2", "key3" to null)),
                 """key1: keyword1 keyword2 key2:value2 key3:""")
-        doTest(ShelfItemFilterData(setOf("keyword1", "keyword2", "keyword3:"), emptySet(), mapOf("key1" to null, "key2" to "value2")),
+        doTest(ShelvableFilterData(setOf("keyword1", "keyword2", "keyword3:"), emptySet(), mapOf("key1" to null, "key2" to "value2")),
                 """key1: keyword1 key2:value2 keyword2 "keyword3:"""")
-        doTest(ShelfItemFilterData(setOf("keyword1"), setOf("/", "groupA"), mapOf("key1" to null, "key2" to "value2")),
+        doTest(ShelvableFilterData(setOf("keyword1"), setOf("/", "groupA"), mapOf("key1" to null, "key2" to "value2")),
                 """key1: keyword1 key2:value2 / /groupA""")
-        doTest(ShelfItemFilterData(emptySet(), setOf("groupA", "/"), mapOf("key1" to "/slashVal")),
+        doTest(ShelvableFilterData(emptySet(), setOf("groupA", "/"), mapOf("key1" to "/slashVal")),
                 """key1:/slashVal /groupA /""")
     }
 
-    private fun doTest(expected: ShelfItemFilterData, filter: String) {
-        val result = ShelfItemFilterDataParser.parseFilter(filter)
+    private fun doTest(expected: ShelvableFilterData, filter: String) {
+        val result = ShlevableFilterDataParser.parseFilter(filter)
         Assertions.assertEquals(expected, result)
     }
 
-    private fun expectKeywords(vararg keywords: String) = ShelfItemFilterData(keywords.toSet(), emptySet(), emptyMap())
+    private fun expectKeywords(vararg keywords: String) = ShelvableFilterData(keywords.toSet(), emptySet(), emptyMap())
 
-    private fun expectGroup(vararg groups: String) = ShelfItemFilterData(emptySet(), groups.toSet(), emptyMap())
+    private fun expectGroup(vararg groups: String) = ShelvableFilterData(emptySet(), groups.toSet(), emptyMap())
 
-    private fun expectInfo(vararg info: Pair<String, String?>) = ShelfItemFilterData(emptySet(), emptySet(), info.toMap())
+    private fun expectInfo(vararg info: Pair<String, String?>) = ShelvableFilterData(emptySet(), emptySet(), info.toMap())
 }

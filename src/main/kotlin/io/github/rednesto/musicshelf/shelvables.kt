@@ -6,10 +6,22 @@ import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-data class ShelfItem(val id: UUID, val path: Path, val info: Map<String, String>, val groups: Set<String>)
+sealed class Shelvable {
+    abstract val id: UUID
+    abstract val name: String
+    abstract val groups: Set<String>
+    abstract val info: Map<String, String>
+}
 
-val ShelfItem.name: String? get() = this.info[ShelfItemInfoKeys.NAME]
-val ShelfItem.nameOrUnnamed: String get() = this.name ?: MusicShelfBundle.get("shelf.item.unnamed")
+data class ShelfItem(
+        override val id: UUID,
+        override val info: Map<String, String>,
+        override val groups: Set<String>,
+        val path: Path
+) : Shelvable() {
+    override val name: String
+        get() = this.info[ShelfItemInfoKeys.NAME] ?: MusicShelfBundle.get("shelf.item.unnamed")
+}
 
 object ShelfItemInfoKeys {
     const val NAME = "name"
@@ -29,6 +41,6 @@ object ShelfItemFactory {
 
         val unmodifiableInfo = Collections.unmodifiableMap(HashMap(info))
         val unmodifiableGroups = Collections.unmodifiableSet(HashSet(groups))
-        return ShelfItem(UUID.randomUUID(), path.toAbsolutePath(), unmodifiableInfo, unmodifiableGroups)
+        return ShelfItem(UUID.randomUUID(), unmodifiableInfo, unmodifiableGroups, path.toAbsolutePath())
     }
 }

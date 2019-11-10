@@ -1,15 +1,12 @@
 package io.github.rednesto.musicshelf.test
 
-import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.ShelfItemFilter
-import io.github.rednesto.musicshelf.ShelfItemFilterData
-import io.github.rednesto.musicshelf.ShelfItemInfoKeys
+import io.github.rednesto.musicshelf.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.file.Paths
 import java.util.*
 
-class ShelfItemFilterTest {
+class ShelvableFilterTest {
 
     private val itemsToTest = listOf(
             createItem("item0", setOf("groupA", "groupC/groupD")),
@@ -56,25 +53,25 @@ class ShelfItemFilterTest {
         assertEqualsUnordered(getItems(1, 2, 4), filter(setOf("it", "ms"), emptySet(), "key2" to null))
     }
 
-    private fun filterKeywords(vararg keywords: String): Collection<ShelfItem> =
-            ShelfItemFilter(ShelfItemFilterData(keywords.toSet(), emptySet(), emptyMap())).filter(itemsToTest)
+    private fun filterKeywords(vararg keywords: String): Collection<Shelvable> =
+            ShelvableFilter(ShelvableFilterData(keywords.toSet(), emptySet(), emptyMap())).filter(itemsToTest)
 
-    private fun filterGroups(vararg groups: String): Collection<ShelfItem> =
-            ShelfItemFilter(ShelfItemFilterData(emptySet(), groups.toSet(), emptyMap())).filter(itemsToTest)
+    private fun filterGroups(vararg groups: String): Collection<Shelvable> =
+            ShelvableFilter(ShelvableFilterData(emptySet(), groups.toSet(), emptyMap())).filter(itemsToTest)
 
-    private fun filterInfo(vararg info: Pair<String, String?>): Collection<ShelfItem> =
-            ShelfItemFilter(ShelfItemFilterData(emptySet(), emptySet(), info.toMap())).filter(itemsToTest)
+    private fun filterInfo(vararg info: Pair<String, String?>): Collection<Shelvable> =
+            ShelvableFilter(ShelvableFilterData(emptySet(), emptySet(), info.toMap())).filter(itemsToTest)
 
-    private fun filter(keywords: Set<String>, groups: Set<String>, vararg info: Pair<String, String?>): Collection<ShelfItem> =
-            ShelfItemFilter(ShelfItemFilterData(keywords, groups, info.toMap())).filter(itemsToTest)
+    private fun filter(keywords: Set<String>, groups: Set<String>, vararg info: Pair<String, String?>): Collection<Shelvable> =
+            ShelvableFilter(ShelvableFilterData(keywords, groups, info.toMap())).filter(itemsToTest)
 
-    private fun createItem(name: String, groups: Set<String>, vararg info: Pair<String, String>): ShelfItem {
+    private fun createItem(name: String, groups: Set<String>, vararg info: Pair<String, String>): Shelvable {
         val infoMap = info.toMap(mutableMapOf(ShelfItemInfoKeys.NAME to name))
-        return ShelfItem(UUID.randomUUID(), Paths.get(""), infoMap, groups)
+        return ShelfItem(UUID.randomUUID(), infoMap, groups, Paths.get(""))
     }
 
-    private fun getItems(vararg indices: Int): List<ShelfItem> {
-        val result = mutableListOf<ShelfItem>()
+    private fun getItems(vararg indices: Int): List<Shelvable> {
+        val result = mutableListOf<Shelvable>()
         for (index in indices) {
             result += itemsToTest[index]
         }

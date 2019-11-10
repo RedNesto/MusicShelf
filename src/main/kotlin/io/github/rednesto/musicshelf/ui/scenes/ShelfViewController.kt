@@ -2,6 +2,7 @@ package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.Shelvable
 import io.github.rednesto.musicshelf.ui.CreateShelfItemDialog
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
 import io.github.rednesto.musicshelf.ui.ShelfTreeViewHelper
@@ -98,7 +99,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
 
     @FXML
     fun removeShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        val selectedItemsIds = shelfTreeView.selectionModel.selectedItems.mapNotNull { (it.value as? ShelfItem)?.id }
+        val selectedItemsIds = shelfTreeView.selectionModel.selectedItems.mapNotNull { (it.value as? Shelvable)?.id }
         selectedItemsIds.forEach { shelf.removeItem(it) }
     }
 
@@ -157,11 +158,11 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
     private inner class ShelfItemChangeListener : Shelf.SimpleChangeListener<ShelfItem> {
         override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
             if (oldItem != null) {
-                shelfTreeViewHelper.removeItem(oldItem)
+                shelfTreeViewHelper.removeShelvable(oldItem)
             }
 
             if (newItem != null) {
-                shelfTreeViewHelper.insertItem(newItem)
+                shelfTreeViewHelper.addShelvable(newItem)
             }
         }
     }

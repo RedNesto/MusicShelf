@@ -1,6 +1,9 @@
 package io.github.rednesto.musicshelf.ui
 
-import io.github.rednesto.musicshelf.*
+import io.github.rednesto.musicshelf.Shelf
+import io.github.rednesto.musicshelf.ShelvableFilter
+import io.github.rednesto.musicshelf.ShlevableFilterDataParser
+import io.github.rednesto.musicshelf.Shelvable
 import io.github.rednesto.musicshelf.utils.addIfAbsent
 import io.github.rednesto.musicshelf.utils.isRootGroup
 import io.github.rednesto.musicshelf.utils.normalizeGroup
@@ -10,27 +13,27 @@ import javafx.scene.control.TreeView
 
 class ShelfTreeViewHelper(val treeView: TreeView<Any>, val shelf: Shelf) {
 
-    private var filter: ShelfItemFilter? = null
+    private var filter: ShelvableFilter? = null
 
     val rootItem: ShelfTreeRootItem = ShelfTreeRootItem()
     /** Root node used to display search results */
     private var filteredRootItem: ShelfTreeRootItem = ShelfTreeRootItem().apply { alwaysRememberExpandedGroups = true }
 
     fun recreateRootNode(): TreeItem<Any> {
-        val newRoot = rootItem.recreate(shelf.getAllItems())
+        val newRoot = rootItem.recreate(shelf.getAllShelvables())
         treeView.root = newRoot
         return newRoot
     }
 
-    fun insertItem(item: ShelfItem) {
-        rootItem.addItem(item)
+    fun addShelvable(shelvable: Shelvable) {
+        rootItem.addItem(shelvable)
         if (this.filter != null) {
             treeView.root = filteredRootItem.recreate(filterItems())
         }
     }
 
-    fun removeItem(item: ShelfItem) {
-        rootItem.removeItem(item)
+    fun removeShelvable(shelvable: Shelvable) {
+        rootItem.removeItem(shelvable)
         if (this.filter != null) {
             treeView.root = filteredRootItem.recreate(filterItems())
         }
@@ -42,7 +45,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>, val shelf: Shelf) {
             filteredRootItem.forgetExpandedGroups()
             treeView.root = rootItem.treeItem
         } else {
-            this.filter = ShelfItemFilter(ShelfItemFilterDataParser.parseFilter(filter))
+            this.filter = ShelvableFilter(ShlevableFilterDataParser.parseFilter(filter))
             treeView.root = filteredRootItem.recreate(filterItems())
         }
     }
@@ -51,9 +54,9 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>, val shelf: Shelf) {
         filter(null)
     }
 
-    private fun filterItems(): Collection<ShelfItem> {
-        val filter = this.filter ?: return shelf.getAllItems()
-        return shelf.getAllItems().filter(filter)
+    private fun filterItems(): Collection<Shelvable> {
+        val filter = this.filter ?: return shelf.getAllShelvables()
+        return shelf.getAllShelvables().filter(filter)
     }
 }
 
@@ -68,7 +71,7 @@ class ShelfTreeRootItem {
     private val groupItems = mutableMapOf<String, TreeItem<Any>>()
     private val itemsByGroup = mutableMapOf<String, MutableList<TreeItem<Any>>>()
 
-    fun recreate(items: Collection<ShelfItem>): TreeItem<Any> {
+    fun recreate(items: Collection<Shelvable>): TreeItem<Any> {
         treeItem = null
         if (!alwaysRememberExpandedGroups) {
             expandedGroups.clear()
@@ -161,7 +164,7 @@ class ShelfTreeRootItem {
         }
     }
 
-    private fun addToGroups(shelfItem: ShelfItem, additionalAction: ((shelfTreeItem: TreeItem<Any>, group: String) -> Unit)? = null) {
+    private fun addToGroups(shelfItem: Shelvable, additionalAction: ((shelfTreeItem: TreeItem<Any>, group: String) -> Unit)? = null) {
         val addAction: (String) -> Unit = { group ->
             val normalizedGroup = normalizeGroup(group)
             val shelfTreeItem: TreeItem<Any> = TreeItem(shelfItem)
@@ -177,25 +180,25 @@ class ShelfTreeRootItem {
         }
     }
 
-    private fun removeFromGroups(shelfItem: ShelfItem) {
+    private fun removeFromGroups(shelvable: Shelvable) {
         val removeAction: (String) -> Unit = { group ->
             val normalizedGroup = normalizeGroup(group)
             groupItems[normalizedGroup]?.let { groupItem ->
-                groupItem.children.removeIf { (it.value as? ShelfItem)?.id == shelfItem.id }
+                groupItem.children.removeIf { (it.value as? Shelvable)?.id == shelvable.id }
                 if (groupItem.children.isEmpty()) {
                     groupItem.parent?.children?.remove(groupItem)
                 }
             }
         }
 
-        if (shelfItem.groups.isEmpty()) {
+        if (shelvable.groups.isEmpty()) {
             removeAction("/")
         } else {
-            shelfItem.groups.forEach(removeAction)
+            shelvable.groups.forEach(removeAction)
         }
     }
 
-    fun addItem(item: ShelfItem) {
+    fun addItem(item: Shelvable) {
         val rootNode = this.treeItem
         checkNotNull(rootNode)
         addToGroups(item) { shelfTreeItem, group ->
@@ -211,8 +214,8 @@ class ShelfTreeRootItem {
         }
     }
 
-    fun removeItem(shelfItem: ShelfItem) {
-        removeFromGroups(shelfItem)
+    fun removeItem(shelvable: Shelvable) {
+        removeFromGroups(shelvable)
     }
 
     fun forgetExpandedGroups() {
@@ -232,8 +235,8 @@ object ShelfItemComparator : Comparator<TreeItem<Any>> { // TODO I want my own t
         val value2 = o2.value
         return if (value1 is String && value2 is String) {
             value1.compareTo(value2, true)
-        } else if (value1 is ShelfItem && value2 is ShelfItem) {
-            value1.nameOrUnnamed.compareTo(value2.nameOrUnnamed, true)
+        } else if (value1 is Shelvable && value2 is Shelvable) {
+            value1.name.compareTo(value2.name, true)
         } else if (value1 is String) {
             -1
         } else 1

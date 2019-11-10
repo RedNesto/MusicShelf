@@ -11,7 +11,7 @@ class EditShelfItemController(val originalItem: ShelfItem, shelf: Shelf) :
         CreateShelfItemController(originalItem.path, originalItem.groups, originalItem.info, shelf = shelf) {
 
     override fun createItem(itemPath: Path, groups: Set<String>, info: Map<String, String>): ShelfItem =
-            ShelfItem(originalItem.id, itemPath, info, groups)
+            ShelfItem(originalItem.id, info, groups, itemPath)
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         super.initialize(location, resources)

@@ -1,7 +1,6 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.name
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.event.ActionEvent
@@ -46,7 +45,7 @@ class ShelfItemDetailsController(val item: ShelfItem) : Initializable {
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        item.name?.let { nameText.text = it }
+        nameText.text = item.name
         filePathTextField.text = item.path.toAbsolutePath().toString()
 
         infoKeyColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.first) }

@@ -3,7 +3,6 @@ package io.github.rednesto.musicshelf.ui
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.nameOrUnnamed
 import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import io.github.rednesto.musicshelf.utils.addClass
@@ -141,7 +140,7 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
 
         fun update(item: ShelfItem) {
             this.item = item
-            name.text = item.nameOrUnnamed
+            name.text = item.name
             path.text = item.path.toAbsolutePath().toString()
             path.style = if (Files.notExists(item.path)) "-fx-fill: red" else null
             this@ShelfTreeCell.setOnContextMenuRequested { paneContextMenu.show(this@ShelfTreeCell, it.screenX, it.screenY) }

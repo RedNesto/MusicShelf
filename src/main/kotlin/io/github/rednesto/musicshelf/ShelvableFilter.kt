@@ -3,10 +3,10 @@ package io.github.rednesto.musicshelf
 import io.github.rednesto.musicshelf.utils.isRootGroup
 import java.util.function.Predicate
 
-class ShelfItemFilter(val filterData: ShelfItemFilterData) : Predicate<ShelfItem>, (ShelfItem) -> Boolean {
+class ShelvableFilter(val filterData: ShelvableFilterData) : Predicate<Shelvable>, (Shelvable) -> Boolean {
 
-    override fun test(t: ShelfItem): Boolean {
-        val matchesKeywords = filterData.keywords.isEmpty() || filterData.keywords.any { t.nameOrUnnamed.contains(it, true) }
+    override fun test(t: Shelvable): Boolean {
+        val matchesKeywords = filterData.keywords.isEmpty() || filterData.keywords.any { t.name.contains(it, true) }
         val matchesGroups = filterData.groups.isEmpty() || filterData.groups.any { group ->
             if (t.groups.isEmpty()) {
                 isRootGroup(group)
@@ -22,7 +22,7 @@ class ShelfItemFilter(val filterData: ShelfItemFilterData) : Predicate<ShelfItem
         return matchesKeywords && matchesGroups && matchesInfo
     }
 
-    override fun invoke(p1: ShelfItem): Boolean = test(p1)
+    override fun invoke(p1: Shelvable): Boolean = test(p1)
 
-    fun filter(items: Collection<ShelfItem>): List<ShelfItem> = items.filter(this)
+    fun filter(items: Collection<Shelvable>): List<Shelvable> = items.filter(this)
 }

@@ -48,6 +48,14 @@ class Shelf(val name: String, val directory: Path) {
         itemsChangeListeners.remove(listener)
     }
 
+
+    fun getAllShelvables(): Collection<Shelvable> {
+        val shelvables = HashSet<Shelvable>(items.size)
+        shelvables.addAll(items.values)
+        return shelvables
+    }
+
+
     fun load() {
         clear()
         ShelfItemStorage.load(itemsStoragePath).forEach(::addItem)

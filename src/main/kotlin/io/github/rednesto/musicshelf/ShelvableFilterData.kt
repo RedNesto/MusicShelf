@@ -3,13 +3,13 @@ package io.github.rednesto.musicshelf
 import io.github.rednesto.musicshelf.utils.isRootGroup
 import io.github.rednesto.musicshelf.utils.normalizeGroup
 
-data class ShelfItemFilterData(val keywords: Set<String>, val groups: Set<String>, val info: Map<String, String?>)
+data class ShelvableFilterData(val keywords: Set<String>, val groups: Set<String>, val info: Map<String, String?>)
 
-object ShelfItemFilterDataParser {
+object ShlevableFilterDataParser {
     /**
-     * See ShelfItemFilterParserTest to get an idea of what is expected of this parser
+     * See ShelvableFilterParserTest to get an idea of what is expected of this parser
      */
-    fun parseFilter(filter: String): ShelfItemFilterData {
+    fun parseFilter(filter: String): ShelvableFilterData {
         val trimmedFilter = filter.trim()
         val keywords = mutableSetOf<String>()
         val groups = mutableSetOf<String>()
@@ -126,6 +126,6 @@ object ShelfItemFilterDataParser {
             info[pendingInfoKey] = null
         }
 
-        return ShelfItemFilterData(keywords, groups, info)
+        return ShelvableFilterData(keywords, groups, info)
     }
 }

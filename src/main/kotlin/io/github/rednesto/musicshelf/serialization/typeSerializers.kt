@@ -21,7 +21,7 @@ class ShelfItemTypeSerializer : TypeSerializer<ShelfItem> {
         val info = (value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null)
         val groups = value.getNode("groups").getList(TypeTokens.STRING).filter { !it.isNullOrEmpty() }
 
-        return ShelfItem(id, path, info, groups.toSet())
+        return ShelfItem(id, info, groups.toSet(), path)
     }
 
     override fun serialize(type: TypeToken<*>, obj: ShelfItem?, value: ConfigurationNode) {

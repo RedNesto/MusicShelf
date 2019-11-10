@@ -1,6 +1,7 @@
 package io.github.rednesto.musicshelf.ui
 
 import io.github.rednesto.musicshelf.MusicShelfBundle
+import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.nameOrUnnamed
 import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
@@ -21,7 +22,7 @@ import javafx.stage.Modality
 import java.io.File
 import java.nio.file.Files
 
-class ShelfTreeCell : TreeCell<Any>() {
+class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
 
     val controller = ShelfItemController()
 
@@ -88,7 +89,7 @@ class ShelfTreeCell : TreeCell<Any>() {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
-                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file, groups)) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(shelf, CreateShelfItemController(file, groups, shelf = shelf)) }
         event.isDropCompleted = true
         event.consume()
     }
@@ -120,7 +121,7 @@ class ShelfTreeCell : TreeCell<Any>() {
 
         @FXML
         fun editMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-            EditShelfItemDialog.showAndUpdateShelf(item)
+            EditShelfItemDialog.showAndUpdateShelf(item, shelf)
         }
 
         @FXML

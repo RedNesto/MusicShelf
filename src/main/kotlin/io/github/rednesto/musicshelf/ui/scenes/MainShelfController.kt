@@ -1,6 +1,6 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
-import io.github.rednesto.musicshelf.MusicShelf
+import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ui.CreateShelfItemDialog
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
@@ -27,7 +27,7 @@ import java.net.URL
 import java.nio.file.Files
 import java.util.*
 
-class MainShelfController : Initializable {
+class MainShelfController(val shelf: Shelf) : Initializable {
 
     @FXML
     lateinit var shelfSearchTextField: TextField
@@ -67,7 +67,7 @@ class MainShelfController : Initializable {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
-                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(CreateShelfItemController(file)) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(shelf, CreateShelfItemController(file, shelf = shelf)) }
         event.isDropCompleted = true
         event.consume()
     }
@@ -80,7 +80,7 @@ class MainShelfController : Initializable {
 
     @FXML
     fun addShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        CreateShelfItemDialog.showAndUpdateShelf()
+        CreateShelfItemDialog.showAndUpdateShelf(shelf)
     }
 
     @FXML
@@ -99,16 +99,16 @@ class MainShelfController : Initializable {
     @FXML
     fun removeShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
         val selectedItemsIds = shelfTreeView.selectionModel.selectedItems.mapNotNull { (it.value as? ShelfItem)?.id }
-        selectedItemsIds.forEach { MusicShelf.removeItem(it) }
+        selectedItemsIds.forEach { shelf.removeItem(it) }
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        shelfTreeViewHelper = ShelfTreeViewHelper(shelfTreeView)
+        shelfTreeViewHelper = ShelfTreeViewHelper(shelfTreeView, shelf)
         shelfTreeView.selectionModel.selectionMode = SelectionMode.MULTIPLE
         shelfTreeView.padding = Insets(1.0)
-        shelfTreeView.setCellFactory { ShelfTreeCell() }
+        shelfTreeView.setCellFactory { ShelfTreeCell(shelf) }
         shelfTreeView.sceneProperty().addListener(::onSceneChange)
-        MusicShelf.addChangeListener(shelfChangeListener)
+        shelf.addChangeListener(shelfChangeListener)
         shelfTreeViewHelper.recreateRootNode().apply {
             emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty()
             children.addListener(ListChangeListener { emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty() })
@@ -151,10 +151,10 @@ class MainShelfController : Initializable {
 
     private fun onWindowClosed(@Suppress("UNUSED_PARAMETER") event: WindowEvent) {
         shelfTreeView.sceneProperty().removeListener(::onSceneChange)
-        MusicShelf.removeChangeListener(shelfChangeListener)
+        shelf.removeChangeListener(shelfChangeListener)
     }
 
-    private inner class MusicShelfChangeListener : MusicShelf.SimpleChangeListener {
+    private inner class MusicShelfChangeListener : Shelf.SimpleChangeListener {
         override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
             if (oldItem != null) {
                 shelfTreeViewHelper.removeItem(oldItem)

@@ -7,7 +7,9 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.collections.HashSet
 
-object MusicShelf {
+class Shelf(val directory: Path) {
+
+    private val itemsStoragePath = directory.resolve(ShelfItemStorage.DEFAULT_FILE_NAME)
 
     private val items: MutableMap<UUID, ShelfItem> = mutableMapOf()
     private val changeListeners: MutableSet<ChangeListener> = mutableSetOf()
@@ -45,14 +47,14 @@ object MusicShelf {
         changeListeners.remove(listener)
     }
 
-    fun load(filePath: Path = ShelfItemStorage.DEFAULT_FILE_PATH) {
+    fun load() {
         clear()
-        val loadedItems = ShelfItemStorage.load(filePath).associateBy(ShelfItem::id)
+        val loadedItems = ShelfItemStorage.load(itemsStoragePath).associateBy(ShelfItem::id)
         loadedItems.values.forEach(::addItem)
     }
 
-    fun save(filePath: Path = ShelfItemStorage.DEFAULT_FILE_PATH) {
-        ShelfItemStorage.save(items.values.toList(), filePath)
+    fun save() {
+        ShelfItemStorage.save(items.values.toList(), itemsStoragePath)
     }
 
     fun forgetUnusedGroups() {

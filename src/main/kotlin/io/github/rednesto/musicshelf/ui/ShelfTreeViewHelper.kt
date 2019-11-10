@@ -8,7 +8,7 @@ import javafx.beans.value.WeakChangeListener
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 
-class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
+class ShelfTreeViewHelper(val treeView: TreeView<Any>, val shelf: Shelf) {
 
     private var filter: ShelfItemFilter? = null
 
@@ -17,7 +17,7 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
     private var filteredRootItem: ShelfTreeRootItem = ShelfTreeRootItem().apply { alwaysRememberExpandedGroups = true }
 
     fun recreateRootNode(): TreeItem<Any> {
-        val newRoot = rootItem.recreate(MusicShelf.getAllItems())
+        val newRoot = rootItem.recreate(shelf.getAllItems())
         treeView.root = newRoot
         return newRoot
     }
@@ -52,8 +52,8 @@ class ShelfTreeViewHelper(val treeView: TreeView<Any>) {
     }
 
     private fun filterItems(): Collection<ShelfItem> {
-        val filter = this.filter ?: return MusicShelf.getAllItems()
-        return MusicShelf.getAllItems().filter(filter)
+        val filter = this.filter ?: return shelf.getAllItems()
+        return shelf.getAllItems().filter(filter)
     }
 }
 

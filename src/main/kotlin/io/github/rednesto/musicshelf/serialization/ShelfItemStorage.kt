@@ -5,14 +5,13 @@ import ninja.leaping.configurate.ConfigurationOptions
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers
 import ninja.leaping.configurate.xml.XMLConfigurationLoader
 import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.streams.toList
 
 object ShelfItemStorage {
 
-    val DEFAULT_FILE_PATH: Path = Paths.get("items.xml")
+    const val DEFAULT_FILE_NAME: String = "items.xml"
 
-    fun load(filePath: Path = DEFAULT_FILE_PATH): List<ShelfItem> {
+    fun load(filePath: Path): List<ShelfItem> {
         val configLoader = createLoader(filePath)
         val loadedNode = configLoader.load()
         val loadedList = loadedNode.getValue(TypeTokens.SHELF_ITEM_LIST)
@@ -23,7 +22,7 @@ object ShelfItemStorage {
         } else emptyList()
     }
 
-    fun save(items: List<ShelfItem>, filePath: Path = DEFAULT_FILE_PATH) {
+    fun save(items: List<ShelfItem>, filePath: Path) {
         val configLoader = createLoader(filePath)
         val nodeToSave = configLoader.createEmptyNode().setValue(TypeTokens.SHELF_ITEM_LIST, items)
         configLoader.save(nodeToSave)

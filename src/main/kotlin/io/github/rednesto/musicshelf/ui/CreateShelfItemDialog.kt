@@ -1,7 +1,7 @@
 package io.github.rednesto.musicshelf.ui
 
-import io.github.rednesto.musicshelf.MusicShelf
 import io.github.rednesto.musicshelf.MusicShelfBundle
+import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
 import io.github.rednesto.musicshelf.utils.configureFxmlLoader
@@ -24,7 +24,7 @@ object CreateShelfItemDialog {
         return loader.getController<CreateShelfItemController>()?.result
     }
 
-    fun showAndUpdateShelf(controller: CreateShelfItemController? = null) {
-        showAndGet(controller)?.let(MusicShelf::addItem)
+    fun showAndUpdateShelf(shelf: Shelf, controller: CreateShelfItemController? = null) {
+        showAndGet(controller)?.let(shelf::addItem)
     }
 }

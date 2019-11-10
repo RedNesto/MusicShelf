@@ -23,7 +23,8 @@ open class CreateShelfItemController @JvmOverloads constructor(
         val initialFile: Path? = null,
         val initialGroups: Set<String> = emptySet(),
         val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
-        val lockPath: Boolean = false
+        val lockPath: Boolean = false,
+        val shelf: Shelf? = null
 ) : Initializable {
 
     private val availableGroups: ObservableList<String> = FXCollections.observableArrayList()
@@ -257,11 +258,13 @@ open class CreateShelfItemController @JvmOverloads constructor(
         itemGroupsListView.items.addAll(sanitizedInitialGroups)
         addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty()
 
-        MusicShelf.allGroups.addListener(WeakSetChangeListener(availableGroupsUpdaterSet))
-        availableGroups.addAll(MusicShelf.allGroups)
-        availableGroups.removeAll(itemGroupsListView.items)
-        availableGroups.remove("/")
-        availableGroups.sort()
+        if (shelf != null) {
+            shelf.allGroups.addListener(WeakSetChangeListener(availableGroupsUpdaterSet))
+            availableGroups.addAll(shelf.allGroups)
+            availableGroups.removeAll(itemGroupsListView.items)
+            availableGroups.remove("/")
+            availableGroups.sort()
+        }
     }
 
     private fun changeInfoKeyIfNeeded(originalKey: String, existingKeys: Collection<String>): String {

@@ -84,7 +84,6 @@ class Shelf(val name: String, val directory: Path) {
     }
 
 
-
     fun getAllShelvables(): Collection<Shelvable> {
         val shelvables = HashSet<Shelvable>(items.size + projects.size)
         shelvables.addAll(items.values)

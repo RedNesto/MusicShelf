@@ -38,3 +38,11 @@ object ShelfItemFactory {
         return ShelfItem(UUID.randomUUID(), name, unmodifiableInfo, unmodifiableGroups, path.toAbsolutePath())
     }
 }
+
+data class Project(
+        override val id: UUID,
+        override val name: String,
+        override val groups: Set<String>,
+        override val info: Map<String, String>,
+        val files: Map<String, Path>
+) : Shelvable()

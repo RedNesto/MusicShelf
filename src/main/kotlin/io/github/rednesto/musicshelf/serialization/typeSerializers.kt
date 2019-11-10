@@ -52,7 +52,7 @@ class ProjectTypeSerializer : TypeSerializer<Project> {
         val info = (value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null)
         val groups = value.getNode("groups").getList(TypeTokens.STRING).filter { !it.isNullOrEmpty() }
 
-        return Project(id, name, files, info, groups.toSet())
+        return Project(id, name, groups.toSet(), info, files)
     }
 
     override fun serialize(type: TypeToken<*>, obj: Project?, value: ConfigurationNode) {

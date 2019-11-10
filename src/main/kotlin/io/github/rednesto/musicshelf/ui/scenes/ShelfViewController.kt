@@ -1,8 +1,8 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
+import io.github.rednesto.musicshelf.Project
 import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
-import io.github.rednesto.musicshelf.Shelvable
 import io.github.rednesto.musicshelf.ui.CreateShelfItemDialog
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
 import io.github.rednesto.musicshelf.ui.ShelfTreeViewHelper
@@ -77,7 +77,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
     lateinit var emptyShelfPlaceholderHyperlink: Hyperlink
 
     @FXML
-    lateinit var addShelfItemButton: Button
+    lateinit var addShelfItemButton: SplitMenuButton
 
     @FXML
     fun addShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
@@ -95,12 +95,22 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
     }
 
     @FXML
+    fun addProjectMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
+        shelf.addProject(Project(UUID.randomUUID(), "New Project", emptySet(), emptyMap(), emptyMap()))
+    }
+
+    @FXML
     lateinit var removeShelfItemButton: Button
 
     @FXML
     fun removeShelfItemButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        val selectedItemsIds = shelfTreeView.selectionModel.selectedItems.mapNotNull { (it.value as? Shelvable)?.id }
-        selectedItemsIds.forEach { shelf.removeItem(it) }
+        shelfTreeView.selectionModel.selectedItems.forEach { treeItem ->
+            val value = treeItem.value ?: return@forEach
+            when (value) {
+                is ShelfItem -> shelf.removeItem(value.id)
+                is Project -> shelf.removeProject(value.id)
+            }
+        }
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
@@ -110,6 +120,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
         shelfTreeView.setCellFactory { ShelfTreeCell(shelf) }
         shelfTreeView.sceneProperty().addListener(::onSceneChange)
         shelf.addItemChangeListener(shelfChangeListener)
+        shelf.addProjectChangeListener(projectChangeListener)
         shelfTreeViewHelper.recreateRootNode().apply {
             emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty()
             children.addListener(ListChangeListener { emptyShelfPlaceholderHyperlink.isVisible = children.isEmpty() })
@@ -132,6 +143,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
     )
 
     private val shelfChangeListener = ShelfItemChangeListener()
+    private val projectChangeListener = ProjectChangeListener()
 
     private fun onSceneChange(@Suppress("UNUSED_PARAMETER") observable: ObservableValue<out Scene>, oldScene: Scene?, newScene: Scene?) {
         if (oldScene != null) {
@@ -153,10 +165,23 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
     private fun onWindowClosed(@Suppress("UNUSED_PARAMETER") event: WindowEvent) {
         shelfTreeView.sceneProperty().removeListener(::onSceneChange)
         shelf.removeItemChangeListener(shelfChangeListener)
+        shelf.removeProjectChangeListener(projectChangeListener)
     }
 
     private inner class ShelfItemChangeListener : Shelf.SimpleChangeListener<ShelfItem> {
         override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
+            if (oldItem != null) {
+                shelfTreeViewHelper.removeShelvable(oldItem)
+            }
+
+            if (newItem != null) {
+                shelfTreeViewHelper.addShelvable(newItem)
+            }
+        }
+    }
+
+    private inner class ProjectChangeListener : Shelf.SimpleChangeListener<Project> {
+        override fun onItemChange(oldItem: Project?, newItem: Project?) {
             if (oldItem != null) {
                 shelfTreeViewHelper.removeShelvable(oldItem)
             }

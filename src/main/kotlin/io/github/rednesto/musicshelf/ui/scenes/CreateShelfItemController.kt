@@ -21,6 +21,7 @@ import java.nio.file.Paths
 import java.util.*
 
 open class CreateShelfItemController @JvmOverloads constructor(
+        val initialName: String? = null,
         val initialFile: Path? = null,
         val initialGroups: Set<String> = emptySet(),
         val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
@@ -30,6 +31,9 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
     var result: ShelfItem? = null
         private set
+
+    @FXML
+    lateinit var nameTextField: TextField
 
     @FXML
     lateinit var filePathTextField: TextField
@@ -54,18 +58,8 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
         val selectedFile = chooser.showOpenDialog(null) ?: return
         filePathTextField.text = selectedFile.absolutePath
-        updateNameInfo(selectedFile.nameWithoutExtension)
-    }
-
-    private fun updateNameInfo(name: String) {
-        val defaultNameValue = ShelfItemInfoKeys.DEFAULT_VALUES[ShelfItemInfoKeys.NAME]
-                ?: error("There should always be a default item name")
-        itemInfoTableView.items.replaceAll { pair ->
-            if (pair.first == ShelfItemInfoKeys.NAME && pair.second == defaultNameValue) {
-                return@replaceAll Pair(pair.first, name)
-            }
-
-            return@replaceAll pair
+        if (nameTextField.text.isNullOrBlank()) {
+            nameTextField.text = selectedFile.nameWithoutExtension
         }
     }
 
@@ -135,6 +129,15 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
     @FXML
     fun createButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
+        val name = nameTextField.text
+        if (name.isNullOrBlank()) {
+            Alert(Alert.AlertType.ERROR, MusicShelfBundle.get("create.shelf_item.error.empty_name"), ButtonType.OK).apply {
+                title = MusicShelfBundle.get("create.shelf_item.error.empty_name.title")
+                showAndWait()
+            }
+            return
+        }
+
         if (filePathTextField.text.isNullOrBlank()) {
             Alert(Alert.AlertType.ERROR, MusicShelfBundle.get("create.shelf_item.error.no_path"), ButtonType.OK).apply {
                 title = MusicShelfBundle.get("create.shelf_item.error.no_path.title")
@@ -169,13 +172,13 @@ open class CreateShelfItemController @JvmOverloads constructor(
             groups.add("/")
         }
 
-        result = createItem(itemPath, groups, itemInfoTableView.items.toMap())
+        result = createItem(itemPath, name, groups, itemInfoTableView.items.toMap())
 
         filePathTextField.scene.window.hide()
     }
 
-    protected open fun createItem(itemPath: Path, groups: Set<String>, info: Map<String, String>) =
-            ShelfItemFactory.create(itemPath, groups, info)
+    protected open fun createItem(itemPath: Path, name: String, groups: Set<String>, info: Map<String, String>) =
+            ShelfItemFactory.create(itemPath, name, groups, info)
 
     @FXML
     fun cancelButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
@@ -195,10 +198,17 @@ open class CreateShelfItemController @JvmOverloads constructor(
         itemGroupsLabel.labelFor = itemGroupsListView
         ShelvableGroupsListViewHelper.configure(itemGroupsListView, addToRootCheckbox, shelf)
 
+        if (initialName != null && initialName.isNotBlank()) {
+            nameTextField.text = initialName
+        }
+
         if (initialFile != null) {
             val absoluteInitialPath = initialFile.toAbsolutePath()
             filePathTextField.text = absoluteInitialPath.toString()
-            updateNameInfo(getItemNameForPath(absoluteInitialPath))
+            if (nameTextField.text.isNullOrBlank()) {
+                nameTextField.text = getItemNameForPath(absoluteInitialPath)
+            }
+
             if (lockPath) {
                 selectFileButton.isDisable = true
                 filePathTextField.isEditable = false

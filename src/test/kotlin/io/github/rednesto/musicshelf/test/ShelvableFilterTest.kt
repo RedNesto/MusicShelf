@@ -1,6 +1,9 @@
 package io.github.rednesto.musicshelf.test
 
-import io.github.rednesto.musicshelf.*
+import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.Shelvable
+import io.github.rednesto.musicshelf.ShelvableFilter
+import io.github.rednesto.musicshelf.ShelvableFilterData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.nio.file.Paths
@@ -66,8 +69,7 @@ class ShelvableFilterTest {
             ShelvableFilter(ShelvableFilterData(keywords, groups, info.toMap())).filter(itemsToTest)
 
     private fun createItem(name: String, groups: Set<String>, vararg info: Pair<String, String>): Shelvable {
-        val infoMap = info.toMap(mutableMapOf(ShelfItemInfoKeys.NAME to name))
-        return ShelfItem(UUID.randomUUID(), infoMap, groups, Paths.get(""))
+        return ShelfItem(UUID.randomUUID(), name, info.toMap(), groups, Paths.get(""))
     }
 
     private fun getItems(vararg indices: Int): List<Shelvable> {

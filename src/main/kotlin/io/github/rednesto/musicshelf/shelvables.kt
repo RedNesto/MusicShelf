@@ -15,32 +15,26 @@ sealed class Shelvable {
 
 data class ShelfItem(
         override val id: UUID,
+        override val name: String,
         override val info: Map<String, String>,
         override val groups: Set<String>,
         val path: Path
-) : Shelvable() {
-    override val name: String
-        get() = this.info[ShelfItemInfoKeys.NAME] ?: MusicShelfBundle.get("shelf.item.unnamed")
-}
+) : Shelvable()
 
 object ShelfItemInfoKeys {
-    const val NAME = "name"
+    val ALL: List<String> = listOf()
 
-    val ALL: List<String> = listOf(NAME)
-
-    val DEFAULT_VALUES: Map<String, String> = mapOf(
-            NAME to "A new item"
-    )
+    val DEFAULT_VALUES: Map<String, String> = mapOf()
 }
 
 object ShelfItemFactory {
-    fun create(path: Path, groups: Set<String> = emptySet(), info: Map<String, String> = emptyMap()): ShelfItem {
+    fun create(path: Path, name: String, groups: Set<String> = emptySet(), info: Map<String, String> = emptyMap()): ShelfItem {
         if (!Files.isRegularFile(path)) {
             throw IllegalStateException("Cannot create a ShelfItem whose path does not exists or is not a file.")
         }
 
         val unmodifiableInfo = Collections.unmodifiableMap(HashMap(info))
         val unmodifiableGroups = Collections.unmodifiableSet(HashSet(groups))
-        return ShelfItem(UUID.randomUUID(), unmodifiableInfo, unmodifiableGroups, path.toAbsolutePath())
+        return ShelfItem(UUID.randomUUID(), name, unmodifiableInfo, unmodifiableGroups, path.toAbsolutePath())
     }
 }

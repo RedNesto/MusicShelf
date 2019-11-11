@@ -88,7 +88,7 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
         val files = event.dragboard.files ?: return
         files.map(File::toPath)
                 .filter { path -> Files.isRegularFile(path) }
-                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(shelf, CreateShelfItemController(file, groups, shelf = shelf)) }
+                .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(shelf, CreateShelfItemController(initialFile = file, initialGroups = groups, shelf = shelf)) }
         event.isDropCompleted = true
         event.consume()
     }

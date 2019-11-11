@@ -17,11 +17,12 @@ object TypeTokens {
 class ShelfItemTypeSerializer : TypeSerializer<ShelfItem> {
     override fun deserialize(type: TypeToken<*>, value: ConfigurationNode): ShelfItem? {
         val id = UUID.fromString(value.getNode("id").string ?: return null)
+        val name = value.getNode("name").string ?: return null
         val path = Paths.get(value.getNode("path").string ?: return null)
         val info = (value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null)
         val groups = value.getNode("groups").getList(TypeTokens.STRING).filter { !it.isNullOrEmpty() }
 
-        return ShelfItem(id, info, groups.toSet(), path)
+        return ShelfItem(id, name, info, groups.toSet(), path)
     }
 
     override fun serialize(type: TypeToken<*>, obj: ShelfItem?, value: ConfigurationNode) {
@@ -30,6 +31,7 @@ class ShelfItemTypeSerializer : TypeSerializer<ShelfItem> {
         }
 
         value.getNode("id").value = obj.id.toString()
+        value.getNode("name").value = obj.name
         value.getNode("path").value = obj.path.toAbsolutePath().toString()
         value.getNode("info").value = obj.info
         value.getNode("groups").value = obj.groups

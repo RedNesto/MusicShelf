@@ -26,16 +26,19 @@
   </columnConstraints>
   <rowConstraints>
     <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="NEVER" />
     <RowConstraints vgrow="ALWAYS" />
     <RowConstraints vgrow="NEVER" />
   </rowConstraints>
   <padding>
     <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
   </padding>
-  <TextField fx:id="filePathTextField" GridPane.columnIndex="1" />
-  <Label labelFor="$filePathTextField" mnemonicParsing="true" text="%shelf_item.file_path" />
-  <Button fx:id="selectFileButton" onAction="#selectFileButton_onAction" text="%create.shelf_item.select_file.button" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
-  <SplitPane dividerPositions="0.65" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-padding: 0;" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+  <Label mnemonicParsing="true" text="%shelf_item.name" />
+  <TextField fx:id="nameTextField" GridPane.columnIndex="1" />
+  <TextField fx:id="filePathTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+  <Label labelFor="$filePathTextField" mnemonicParsing="true" text="%shelf_item.file_path" GridPane.rowIndex="1" />
+  <Button fx:id="selectFileButton" onAction="#selectFileButton_onAction" text="%create.shelf_item.select_file.button" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+  <SplitPane dividerPositions="0.65" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-padding: 0;" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
     <VBox>
       <Label fx:id="itemInfoLabel" mnemonicParsing="true" text="%shelf_item.info" VBox.vgrow="NEVER">
         <VBox.margin>
@@ -82,7 +85,7 @@
       </VBox>
     </VBox>
   </SplitPane>
-  <ButtonBar GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">
+  <ButtonBar GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
     <buttons>
       <Button mnemonicParsing="false" onAction="#cancelButton_onAction" text="%create.shelf_item.cancel" ButtonBar.buttonData="CANCEL_CLOSE" />
       <Button fx:id="createButton" defaultButton="true" onAction="#createButton_onAction" text="%create.shelf_item.create" ButtonBar.buttonData="FINISH" />

@@ -48,9 +48,15 @@ class ProjectTypeSerializer : TypeSerializer<Project> {
     override fun deserialize(type: TypeToken<*>, value: ConfigurationNode): Project? {
         val id = UUID.fromString(value.getNode("id").string ?: return null)
         val name = value.getNode("name").string ?: return null
-        val files = value.getNode("files").getValue(TypeTokens.STRING_PATH_MAP) ?: emptyMap()
-        val info = (value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null)
-        val groups = value.getNode("groups").getList(TypeTokens.STRING).filter { !it.isNullOrEmpty() }
+        val files = value.getNode("files")
+                .getList(TypeTokens.STRINGS_MAP)
+                .mapNotNull { map ->
+                    val fileName = map["name"]?: return@mapNotNull null
+                    val filePath = map["path"]?: return@mapNotNull null
+                    fileName to Paths.get(filePath)
+                }.toMap()
+        val info = value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null
+        val groups = value.getNode("groups").getList(TypeTokens.STRING).filterNot(String::isNullOrBlank)
 
         return Project(id, name, groups.toSet(), info, files)
     }
@@ -62,7 +68,9 @@ class ProjectTypeSerializer : TypeSerializer<Project> {
 
         value.getNode("id").value = obj.id.toString()
         value.getNode("name").value = obj.name
-        value.getNode("files").value = obj.files
+        value.getNode("files").value = obj.files.map { (name, path) ->
+            mapOf("name" to name, "path" to path.toAbsolutePath().toString())
+        }
         value.getNode("info").value = obj.info
         value.getNode("groups").value = obj.groups
     }

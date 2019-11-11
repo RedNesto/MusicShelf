@@ -1,15 +1,16 @@
 package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.*
-import io.github.rednesto.musicshelf.utils.*
-import javafx.beans.property.ReadOnlyStringWrapper
-import javafx.collections.*
+import io.github.rednesto.musicshelf.ui.ShelvableGroupsListViewHelper
+import io.github.rednesto.musicshelf.ui.ShelvableInfoTableViewHelper
+import io.github.rednesto.musicshelf.utils.getItemNameForPath
+import io.github.rednesto.musicshelf.utils.isRootGroup
+import io.github.rednesto.musicshelf.utils.normalizeGroups
+import io.github.rednesto.musicshelf.utils.renameToAvoidDuplicates
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
-import javafx.scene.control.cell.ComboBoxListCell
-import javafx.scene.control.cell.TextFieldTableCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.stage.FileChooser
@@ -26,16 +27,6 @@ open class CreateShelfItemController @JvmOverloads constructor(
         val lockPath: Boolean = false,
         val shelf: Shelf? = null
 ) : Initializable {
-
-    private val availableGroups: ObservableList<String> = FXCollections.observableArrayList()
-    // We keep a strong reference here because we only use it wrapped in a Weak*Listener
-    private val availableGroupsUpdaterSet: SetChangeListener<String> = SetChangeListener { change ->
-        val added = change.elementAdded
-        if (added != null && !itemGroupsListView.items.contains(added) && !isRootGroup(added)) {
-            availableGroups.addIfAbsent(added)
-        }
-        availableGroups.sort()
-    }
 
     var result: ShelfItem? = null
         private set
@@ -99,7 +90,7 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
     @FXML
     fun addInfoButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        val key = changeInfoKeyIfNeeded(MusicShelfBundle.get("create.shelf_item.info.default_key"), infoKeys())
+        val key = renameToAvoidDuplicates(MusicShelfBundle.get("create.shelf_item.info.default_key"), itemInfoTableView.items.map { it.first })
         val value = MusicShelfBundle.get("create.shelf_item.info.default_value")
         itemInfoTableView.items.add(key to value)
     }
@@ -127,7 +118,7 @@ open class CreateShelfItemController @JvmOverloads constructor(
 
     @FXML
     fun addGroupButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        val groupName = changeInfoKeyIfNeeded(MusicShelfBundle.get("create.shelf_item.group.default_name"), itemGroupsListView.items)
+        val groupName = renameToAvoidDuplicates(MusicShelfBundle.get("create.shelf_item.group.default_name"), itemGroupsListView.items)
         itemGroupsListView.items.add(groupName)
         itemGroupsListView.scrollTo(groupName)
         itemGroupsListView.requestFocus()
@@ -197,51 +188,12 @@ open class CreateShelfItemController @JvmOverloads constructor(
         }
 
         itemInfoLabel.labelFor = itemInfoTableView
-        itemInfoTableView.selectionModel.selectionMode = SelectionMode.MULTIPLE
-
-        infoKeyColumn.cellFactory = TextFieldTableCell.forTableColumn()
-        infoKeyColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.first) }
-        infoKeyColumn.setOnEditCommit { event ->
-            val newKey = event.newValue
-            if (newKey != event.oldValue) {
-                val key = changeInfoKeyIfNeeded(newKey, infoKeys())
-                itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(first = key)
-            }
-        }
-        infoValueColumn.cellFactory = TextFieldTableCell.forTableColumn()
-        infoValueColumn.setCellValueFactory { ReadOnlyStringWrapper(it.value.second) }
-        infoValueColumn.setOnEditCommit { event ->
-            itemInfoTableView.items[event.tablePosition.row] = event.rowValue.copy(second = event.newValue)
-        }
+        ShelvableInfoTableViewHelper.configure(itemInfoTableView, infoKeyColumn, infoValueColumn)
 
         itemInfoTableView.items.addAll(initialInfo.toList())
 
         itemGroupsLabel.labelFor = itemGroupsListView
-        itemGroupsListView.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        itemGroupsListView.setCellFactory { ComboBoxListCell(availableGroups).apply { isComboBoxEditable = true } }
-        itemGroupsListView.setOnEditCommit { event ->
-            val newGroup = normalizeGroup(event.newValue)
-            if (isRootGroup(newGroup)) {
-                addToRootCheckbox.isSelected = true
-                itemGroupsListView.items.removeAt(event.index)
-            } else {
-                val oldValue = itemGroupsListView.items[event.index]
-                if (newGroup != oldValue) {
-                    val newKey = changeInfoKeyIfNeeded(newGroup, itemGroupsListView.items.without(oldValue))
-                    itemGroupsListView.items[event.index] = newKey
-                }
-            }
-
-            event.consume()
-        }
-        itemGroupsListView.items.addListener(ListChangeListener { addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty() })
-        itemGroupsListView.items.addListener(ListChangeListener { change ->
-            while (change.next()) {
-                change.addedSubList.forEach { availableGroups.remove(it) }
-                change.removed.forEach { availableGroups.addIfAbsent(it) }
-            }
-            availableGroups.sort()
-        })
+        ShelvableGroupsListViewHelper.configure(itemGroupsListView, addToRootCheckbox, shelf)
 
         if (initialFile != null) {
             val absoluteInitialPath = initialFile.toAbsolutePath()
@@ -257,43 +209,5 @@ open class CreateShelfItemController @JvmOverloads constructor(
         addToRootCheckbox.isSelected = sanitizedInitialGroups.removeAll { isRootGroup(it) }
         itemGroupsListView.items.addAll(sanitizedInitialGroups)
         addToRootCheckbox.isDisable = itemGroupsListView.items.isEmpty()
-
-        if (shelf != null) {
-            shelf.allGroups.addListener(WeakSetChangeListener(availableGroupsUpdaterSet))
-            availableGroups.addAll(shelf.allGroups)
-            availableGroups.removeAll(itemGroupsListView.items)
-            availableGroups.remove("/")
-            availableGroups.sort()
-        }
     }
-
-    private fun changeInfoKeyIfNeeded(originalKey: String, existingKeys: Collection<String>): String {
-        if (originalKey !in existingKeys) {
-            return originalKey
-        }
-
-        fun extractDuplicationMarker(key: String): Int {
-            val builder = StringBuilder()
-            for (i in key.length - 1 downTo 0) {
-                val char = key[i]
-                if (!char.isDigit()) {
-                    break
-                }
-
-                builder.insert(0, char)
-            }
-
-            return builder.toString().toInt()
-        }
-
-        val duplicationMarkers = existingKeys
-                .filter { it.startsWith(originalKey) && it != originalKey }
-                .map { existingKey -> extractDuplicationMarker(existingKey) }
-                .sorted()
-
-        val newMarker = (0..duplicationMarkers.size).toList().subtract(duplicationMarkers).first()
-        return originalKey + newMarker
-    }
-
-    private fun infoKeys() = itemInfoTableView.items.map { it.first }
 }

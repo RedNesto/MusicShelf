@@ -17,3 +17,31 @@ fun <E> MutableList<E>.addIfAbsent(element: E): Boolean {
 
     return false
 }
+
+fun renameToAvoidDuplicates(original: String, existing: Collection<String>): String {
+    if (original !in existing) {
+        return original
+    }
+
+    fun extractDuplicationMarker(key: String): Int {
+        val builder = StringBuilder()
+        for (i in key.length - 1 downTo 0) {
+            val char = key[i]
+            if (!char.isDigit()) {
+                break
+            }
+
+            builder.insert(0, char)
+        }
+
+        return builder.toString().toInt()
+    }
+
+    val duplicationMarkers = existing
+            .filter { it.startsWith(original) && it != original }
+            .map { existingKey -> extractDuplicationMarker(existingKey) }
+            .sorted()
+
+    val newMarker = (0..duplicationMarkers.size).toList().subtract(duplicationMarkers).first()
+    return original + newMarker
+}

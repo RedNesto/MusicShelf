@@ -10,6 +10,7 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuItem
 import javafx.scene.control.TreeCell
 import javafx.scene.control.TreeItem
 import javafx.scene.input.DragEvent
@@ -33,6 +34,7 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
         @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
         text = null // Somehow Kotlin doesn't like this
         graphic = null
+        onContextMenuRequested = null
 
         if (empty || item == null) {
             removeDragHandlers()
@@ -41,7 +43,6 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
                 is String -> {
                     text = item // It is a group
                     addDragHandlers()
-                    onContextMenuRequested = null
                 }
                 is ShelfItem -> {
                     graphic = shelfItemNode
@@ -51,11 +52,11 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
                 is Project -> {
                     text = item.name
                     addProjectDragHandlers(item)
+                    addProjectContextMenu(item)
                 }
                 else -> {
                     // TODO log/report this, we should never reach this branch
                     removeDragHandlers()
-                    onContextMenuRequested = null
                 }
             }
         }
@@ -116,6 +117,12 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
         }
     }
 
+    private fun addProjectContextMenu(project: Project) {
+        val edit = MenuItem(MusicShelfBundle.get("shelf.project.edit"))
+        edit.setOnAction { EditProjectDialog.showAndUpdateShelf(project, shelf) }
+        setOnContextMenuRequested { ContextMenu(edit).show(this.scene.window, it.screenX, it.screenY) }
+    }
+
     inner class ShelfItemController {
         lateinit var item: ShelfItem
 
@@ -168,10 +175,6 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
             path.style = if (Files.notExists(item.path)) "-fx-fill: red" else null
             this@ShelfTreeCell.setOnContextMenuRequested { paneContextMenu.show(this@ShelfTreeCell, it.screenX, it.screenY) }
         }
-    }
-
-    inner class ProjectController {
-
     }
 }
 

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<GridPane hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="550.0" vgap="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.rednesto.musicshelf.ui.scenes.CreateProjectController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="NEVER" />
+    <ColumnConstraints hgrow="SOMETIMES" />
+    <ColumnConstraints hgrow="NEVER" />
+    <ColumnConstraints hgrow="NEVER" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints vgrow="ALWAYS" />
+    <RowConstraints vgrow="NEVER" />
+  </rowConstraints>
+  <padding>
+    <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
+  </padding>
+  <TextField fx:id="nameTextField" GridPane.columnIndex="1" />
+  <Label labelFor="$nameTextField" mnemonicParsing="true" text="%shelf_item.name" />
+  <SplitPane dividerPositions="0.3, 0.75" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-padding: 0;" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+    <VBox>
+      <Label fx:id="filesLabel" mnemonicParsing="true" text="%create.project.files" VBox.vgrow="NEVER">
+        <VBox.margin>
+          <Insets bottom="2.0" left="5.0" top="5.0" />
+        </VBox.margin>
+      </Label>
+      <TableView fx:id="filesTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onKeyPressed="#filesTableView_onKeyPressed" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="filesNameColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="75.0" text="%create.project.files.header.name" />
+          <TableColumn fx:id="filesPathColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="82.0" text="%create.project.files.header.path" />
+        </columns>
+        <placeholder>
+          <Text text="%create.project.files.placeholder" />
+        </placeholder>
+      </TableView>
+      <VBox spacing="5.0" VBox.vgrow="NEVER">
+        <VBox.margin>
+          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </VBox.margin>
+        <HBox spacing="10.0">
+          <Button onAction="#addFileButton_onAction" text="%create.project.file.add" />
+          <Button onAction="#removeFileButton_onAction" text="%create.project.file.remove" />
+        </HBox>
+      </VBox>
+    </VBox>
+    <VBox>
+      <Label fx:id="itemInfoLabel" mnemonicParsing="true" text="%shelf_item.info" VBox.vgrow="NEVER">
+        <VBox.margin>
+          <Insets bottom="2.0" left="5.0" top="5.0" />
+        </VBox.margin>
+      </Label>
+      <TableView fx:id="itemInfoTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onKeyPressed="#itemInfoTableView_onKeyPressed" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="infoKeyColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="75.0" text="%shelf_item.info.key" />
+          <TableColumn fx:id="infoValueColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="175.0" text="%shelf_item.info.value" />
+        </columns>
+        <placeholder>
+          <Text text="%create.shelf_item.info.placeholder" />
+        </placeholder>
+      </TableView>
+      <HBox spacing="10.0" VBox.vgrow="NEVER">
+        <Button onAction="#addInfoButton_onAction" text="%create.shelf_item.info.add" />
+        <Button onAction="#removeInfoButton_onAction" text="%create.shelf_item.info.remove" />
+        <VBox.margin>
+          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </VBox.margin>
+      </HBox>
+    </VBox>
+    <VBox>
+      <Label fx:id="itemGroupsLabel" mnemonicParsing="true" text="%shelf_item.groups" VBox.vgrow="NEVER">
+        <VBox.margin>
+          <Insets bottom="2.0" left="5.0" top="5.0" />
+        </VBox.margin>
+      </Label>
+      <ListView fx:id="itemGroupsListView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onKeyPressed="#itemGroupsListView_onKeyPressed" VBox.vgrow="ALWAYS">
+        <placeholder>
+          <Text text="%create.shelf_item.group.placeholder" />
+        </placeholder>
+      </ListView>
+      <VBox spacing="5.0" VBox.vgrow="NEVER">
+        <VBox.margin>
+          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </VBox.margin>
+        <CheckBox fx:id="addToRootCheckbox" mnemonicParsing="false" text="%create.shelf_item.group.add_to_root" />
+        <HBox spacing="10.0">
+          <Button onAction="#addGroupButton_onAction" text="%create.shelf_item.group.add" />
+          <Button onAction="#removeGroupButton_onAction" text="%create.shelf_item.group.remove" />
+        </HBox>
+      </VBox>
+    </VBox>
+  </SplitPane>
+  <ButtonBar GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">
+    <buttons>
+      <Button mnemonicParsing="false" onAction="#cancelButton_onAction" text="%create.shelf_item.cancel" ButtonBar.buttonData="CANCEL_CLOSE" />
+      <Button fx:id="createButton" defaultButton="true" onAction="#createButton_onAction" text="%create.shelf_item.create" ButtonBar.buttonData="FINISH" />
+    </buttons>
+    <GridPane.margin>
+      <Insets top="7.0" />
+    </GridPane.margin>
+  </ButtonBar>
+</GridPane>

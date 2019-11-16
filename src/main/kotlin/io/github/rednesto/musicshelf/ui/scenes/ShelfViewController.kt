@@ -3,6 +3,7 @@ package io.github.rednesto.musicshelf.ui.scenes
 import io.github.rednesto.musicshelf.Project
 import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.ui.CreateProjectDialog
 import io.github.rednesto.musicshelf.ui.CreateShelfItemDialog
 import io.github.rednesto.musicshelf.ui.ShelfTreeCell
 import io.github.rednesto.musicshelf.ui.ShelfTreeViewHelper
@@ -96,7 +97,7 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
 
     @FXML
     fun addProjectMenuItem_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        shelf.addProject(Project(UUID.randomUUID(), "New Project", emptySet(), emptyMap(), emptyMap()))
+        CreateProjectDialog.showAndUpdateShelf(shelf)
     }
 
     @FXML

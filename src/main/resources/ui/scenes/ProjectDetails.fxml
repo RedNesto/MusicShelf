@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="650.0" vgap="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints vgrow="NEVER" />
+    <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+  </rowConstraints>
+  <padding>
+    <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
+  </padding>
+  <Text fx:id="nameText" strokeType="OUTSIDE" strokeWidth="0.0" text="%shelf.item.unnamed" GridPane.halignment="CENTER">
+    <GridPane.margin>
+      <Insets bottom="10.0" />
+    </GridPane.margin>
+    <font>
+      <Font size="16.0" />
+    </font>
+  </Text>
+  <SplitPane dividerPositions="0.45" orientation="VERTICAL" GridPane.rowIndex="1">
+    <SplitPane dividerPositions="0.65">
+      <VBox>
+        <Label fx:id="infoLabel" mnemonicParsing="true" text="%project.details.info">
+          <VBox.margin>
+            <Insets bottom="2.0" left="5.0" top="5.0" />
+          </VBox.margin>
+        </Label>
+        <TableView fx:id="infoTableView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+          <columns>
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="125.0" text="%project.details.info.key">
+              <cellValueFactory>
+                <PropertyValueFactory property="first" />
+              </cellValueFactory>
+            </TableColumn>
+            <TableColumn maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="250.0" text="%project.details.info.value">
+              <cellValueFactory>
+                <PropertyValueFactory property="second" />
+              </cellValueFactory>
+            </TableColumn>
+          </columns>
+          <placeholder>
+            <Text text="%shelf_item.info.placeholder" />
+          </placeholder>
+        </TableView>
+      </VBox>
+      <VBox>
+        <Label fx:id="groupsLabel" mnemonicParsing="true" text="%project.details.groups" VBox.vgrow="NEVER">
+          <VBox.margin>
+            <Insets bottom="2.0" left="5.0" top="5.0" />
+          </VBox.margin>
+        </Label>
+        <ListView fx:id="groupsListView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+          <placeholder>
+            <Text text="%create.shelf_item.group.placeholder" />
+          </placeholder>
+        </ListView>
+      </VBox>
+    </SplitPane>
+    <VBox>
+      <Label fx:id="filesLabel" mnemonicParsing="true" text="%project.details.files">
+        <VBox.margin>
+          <Insets bottom="2.0" left="5.0" top="5.0" />
+        </VBox.margin>
+      </Label>
+      <ListView fx:id="filesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+        <VBox.margin>
+          <Insets />
+        </VBox.margin>
+      </ListView>
+    </VBox>
+  </SplitPane>
+</GridPane>

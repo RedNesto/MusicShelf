@@ -120,7 +120,16 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
     private fun addProjectContextMenu(project: Project) {
         val edit = MenuItem(MusicShelfBundle.get("shelf.project.edit"))
         edit.setOnAction { EditProjectDialog.showAndUpdateShelf(project, shelf) }
-        setOnContextMenuRequested { ContextMenu(edit).show(this.scene.window, it.screenX, it.screenY) }
+        val showDetails = MenuItem(MusicShelfBundle.get("shelf.project.show_details"))
+        showDetails.setOnAction {
+            with(ProjectDetailsWindow.create(project)) {
+                initOwner(this@ShelfTreeCell.scene.window)
+                initModality(Modality.WINDOW_MODAL)
+                showAndWait()
+            }
+        }
+        val contextMenu = ContextMenu(edit, showDetails)
+        setOnContextMenuRequested { contextMenu.show(this.scene.window, it.screenX, it.screenY) }
     }
 
     inner class ShelfItemController {

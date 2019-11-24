@@ -44,5 +44,5 @@ data class Project(
         override val name: String,
         override val groups: Set<String>,
         override val info: Map<String, String>,
-        val files: Map<String, Path>
+        val filesCollector: ProjectFilesCollector
 ) : Shelvable()

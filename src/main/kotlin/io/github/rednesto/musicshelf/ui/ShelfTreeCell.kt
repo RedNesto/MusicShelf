@@ -5,7 +5,10 @@ import io.github.rednesto.musicshelf.Project
 import io.github.rednesto.musicshelf.Shelf
 import io.github.rednesto.musicshelf.ShelfItem
 import io.github.rednesto.musicshelf.ui.scenes.CreateShelfItemController
-import io.github.rednesto.musicshelf.utils.*
+import io.github.rednesto.musicshelf.utils.DesktopHelper
+import io.github.rednesto.musicshelf.utils.addClass
+import io.github.rednesto.musicshelf.utils.loadFxml
+import io.github.rednesto.musicshelf.utils.removeClasses
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Node
@@ -51,7 +54,7 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
                 }
                 is Project -> {
                     text = item.name
-                    addProjectDragHandlers(item)
+                    addDragHandlers()
                     addProjectContextMenu(item)
                 }
                 else -> {
@@ -96,25 +99,6 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
                 .forEach { file -> CreateShelfItemDialog.showAndUpdateShelf(shelf, CreateShelfItemController(initialFile = file, initialGroups = groups, shelf = shelf)) }
         event.isDropCompleted = true
         event.consume()
-    }
-
-    private fun addProjectDragHandlers(project: Project) {
-        setOnDragOver { dragOverHandler(it) }
-        setOnDragExited { dragExitedHandler() }
-        setOnDragDropped { event ->
-            val files = event.dragboard.files ?: return@setOnDragDropped
-
-            val projectFiles = project.files.toMutableMap()
-            files.map(File::toPath)
-                    .filter { path -> Files.isRegularFile(path) }
-                    .associateByTo(projectFiles, ::getItemNameForPath)
-
-            val newProject = project.copy(files = projectFiles)
-            shelf.addProject(newProject)
-
-            event.isDropCompleted = true
-            event.consume()
-        }
     }
 
     private fun addProjectContextMenu(project: Project) {

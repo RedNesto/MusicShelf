@@ -64,7 +64,7 @@ class ProjectDetailsController(val project: Project) : Initializable {
         }
         filesListView.selectionModel.selectionMode = SelectionMode.MULTIPLE
         filesListView.setCellFactory { FileListCell() }
-        filesListView.items.addAll(project.files.toList())
+        project.filesCollector?.collect()?.toList()?.let(filesListView.items::addAll)
     }
 
     private inner class FileListCell : ListCell<Pair<String, Path>>() {

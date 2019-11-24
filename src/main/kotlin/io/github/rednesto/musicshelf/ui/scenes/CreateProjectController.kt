@@ -1,33 +1,28 @@
 package io.github.rednesto.musicshelf.ui.scenes;
 
-import io.github.rednesto.musicshelf.MusicShelfBundle
-import io.github.rednesto.musicshelf.Project
-import io.github.rednesto.musicshelf.Shelf
-import io.github.rednesto.musicshelf.ShelfItemInfoKeys
-import io.github.rednesto.musicshelf.ui.ProjectFilesTableViewHelper
+import io.github.rednesto.musicshelf.*
+import io.github.rednesto.musicshelf.projectFilesCollectors.EmptyProjectFilesCollector
 import io.github.rednesto.musicshelf.ui.ShelvableGroupsListViewHelper
 import io.github.rednesto.musicshelf.ui.ShelvableInfoTableViewHelper
-import io.github.rednesto.musicshelf.utils.getItemNameForPath
 import io.github.rednesto.musicshelf.utils.isRootGroup
 import io.github.rednesto.musicshelf.utils.normalizeGroups
 import io.github.rednesto.musicshelf.utils.renameToAvoidDuplicates
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.stage.FileChooser
+import javafx.scene.layout.VBox
 import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Path
 import java.util.*
 
 open class CreateProjectController @JvmOverloads constructor(
         val initialName: String? = null,
         val initialGroups: Set<String> = emptySet(),
         val initialInfo: Map<String, String> = ShelfItemInfoKeys.DEFAULT_VALUES,
-        val initialFiles: Map<String, Path> = emptyMap(),
+        val initialFilesCollector: ProjectFilesCollector = EmptyProjectFilesCollector,
         val shelf: Shelf? = null
 ) : Initializable {
 
@@ -36,44 +31,6 @@ open class CreateProjectController @JvmOverloads constructor(
 
     @FXML
     lateinit var nameTextField: TextField
-
-    @FXML
-    lateinit var filesLabel: Label
-
-    @FXML
-    lateinit var filesTableView: TableView<Pair<String, Path>>
-
-    @FXML
-    lateinit var filesNameColumn: TableColumn<Pair<String, Path>, String>
-
-    @FXML
-    lateinit var filesPathColumn: TableColumn<Pair<String, Path>, Path>
-
-    @FXML
-    fun addFileButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        val fileChooser = FileChooser().apply {
-            title = MusicShelfBundle.get("create.project.file.file_choose_title")
-        }
-        val selectedFiles = fileChooser.showOpenMultipleDialog(filesTableView.scene.window)
-                ?: return
-        selectedFiles.mapNotNullTo(filesTableView.items) { file ->
-            val path = file.toPath()
-            val name = renameToAvoidDuplicates(getItemNameForPath(path), filesTableView.items.map { it.first })
-            name to path
-        }
-    }
-
-    @FXML
-    fun removeFileButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
-        filesTableView.items.removeAll(filesTableView.selectionModel.selectedItems)
-    }
-
-    @FXML
-    fun filesTableView_onKeyPressed(event: KeyEvent) {
-        if (event.code == KeyCode.DELETE) {
-            filesTableView.items.removeAll(filesTableView.selectionModel.selectedItems)
-        }
-    }
 
     @FXML
     lateinit var itemInfoTableView: TableView<Pair<String, String>>
@@ -136,6 +93,18 @@ open class CreateProjectController @JvmOverloads constructor(
         itemGroupsListView.items.removeAll(itemGroupsListView.selectionModel.selectedItems)
     }
 
+    val filesCollectorsToggleGroup: ToggleGroup = ToggleGroup()
+
+    private lateinit var availableFilesCollectors: Map<String, ProjectFilesCollector>
+
+    var selectedFilesCollector: ProjectFilesCollector? = null
+
+    @FXML
+    lateinit var filesCollectorsVBox: VBox
+
+    @FXML
+    lateinit var filesCollectorConfigPane: VBox
+
     @FXML
     lateinit var createButton: Button
 
@@ -150,10 +119,6 @@ open class CreateProjectController @JvmOverloads constructor(
             return
         }
 
-        val files = filesTableView.items.mapNotNull { pair ->
-            if (!Files.isRegularFile(pair.second)) null else pair
-        }.toMap()
-
         val groups = mutableSetOf<String>()
         if (itemGroupsListView.items.isNotEmpty()) {
             groups.addAll(normalizeGroups(itemGroupsListView.items))
@@ -162,13 +127,17 @@ open class CreateProjectController @JvmOverloads constructor(
             groups.add("/")
         }
 
-        result = createItem(name, groups, itemInfoTableView.items.toMap(), files)
+        val filesCollector = filesCollectorsToggleGroup.selectedToggle.userData
+                as? ProjectFilesCollector ?: EmptyProjectFilesCollector
+        filesCollector.applyConfiguration()
+
+        result = createItem(name, groups, itemInfoTableView.items.toMap(), filesCollector)
 
         nameTextField.scene.window.hide()
     }
 
-    protected open fun createItem(name: String, groups: Set<String>, info: Map<String, String>, files: Map<String, Path>) =
-            Project(UUID.randomUUID(), name, groups, info, files)
+    protected open fun createItem(name: String, groups: Set<String>, info: Map<String, String>, filesCollector: ProjectFilesCollector) =
+            Project(UUID.randomUUID(), name, groups, info, filesCollector)
 
     @FXML
     fun cancelButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
@@ -176,10 +145,6 @@ open class CreateProjectController @JvmOverloads constructor(
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        ProjectFilesTableViewHelper.configure(filesTableView, filesNameColumn, filesPathColumn)
-        filesLabel.labelFor = filesTableView
-        filesTableView.items.addAll(initialFiles.toList())
-
         itemInfoLabel.labelFor = itemInfoTableView
         ShelvableInfoTableViewHelper.configure(itemInfoTableView, infoKeyColumn, infoValueColumn)
 
@@ -187,6 +152,33 @@ open class CreateProjectController @JvmOverloads constructor(
 
         itemGroupsLabel.labelFor = itemGroupsListView
         ShelvableGroupsListViewHelper.configure(itemGroupsListView, addToRootCheckbox, shelf)
+
+        filesCollectorsToggleGroup.selectedToggleProperty().addListener { _, _, newValue ->
+            val collector = newValue.userData as? ProjectFilesCollector ?: return@addListener
+            filesCollectorConfigPane.alignment = Pos.TOP_CENTER
+            filesCollectorConfigPane.children[0] = collector.createConfigurationNode()
+        }
+
+        val mutableFilesCollectors = ProjectFilesCollectorsLoader.createAllCollectors()
+                .associateByTo(mutableMapOf(), ProjectFilesCollector::id)
+        availableFilesCollectors = mutableFilesCollectors
+
+        val isEmptyInitialCollector = initialFilesCollector !is EmptyProjectFilesCollector
+        if (isEmptyInitialCollector) {
+            mutableFilesCollectors[initialFilesCollector.id] = initialFilesCollector
+            selectedFilesCollector = initialFilesCollector
+        }
+
+        val localeToUse = resources?.let(ResourceBundle::getLocale) ?: Locale.getDefault()
+        filesCollectorsVBox.children.addAll(availableFilesCollectors.values.map { collector ->
+            RadioButton(collector.getDisplayname(localeToUse)).apply {
+                toggleGroup = filesCollectorsToggleGroup
+                userData = collector
+                if (isEmptyInitialCollector && initialFilesCollector.id == collector.id) {
+                    isSelected = true
+                }
+            }
+        })
 
         if (initialName != null && initialName.isNotBlank()) {
             nameTextField.text = initialName

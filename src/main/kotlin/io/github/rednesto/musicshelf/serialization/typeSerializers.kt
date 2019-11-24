@@ -2,7 +2,9 @@ package io.github.rednesto.musicshelf.serialization
 
 import com.google.common.reflect.TypeToken
 import io.github.rednesto.musicshelf.Project
+import io.github.rednesto.musicshelf.ProjectFilesCollectorsLoader
 import io.github.rednesto.musicshelf.ShelfItem
+import io.github.rednesto.musicshelf.projectFilesCollectors.EmptyProjectFilesCollector
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer
 import java.nio.file.Path
@@ -48,17 +50,17 @@ class ProjectTypeSerializer : TypeSerializer<Project> {
     override fun deserialize(type: TypeToken<*>, value: ConfigurationNode): Project? {
         val id = UUID.fromString(value.getNode("id").string ?: return null)
         val name = value.getNode("name").string ?: return null
-        val files = value.getNode("files")
-                .getList(TypeTokens.STRINGS_MAP)
-                .mapNotNull { map ->
-                    val fileName = map["name"]?: return@mapNotNull null
-                    val filePath = map["path"]?: return@mapNotNull null
-                    fileName to Paths.get(filePath)
-                }.toMap()
+        val filesCollector = value.getNode("filesCollector").let { collectorNode ->
+            collectorNode.getNode("id").string?.let { collectorId ->
+                ProjectFilesCollectorsLoader.getCollector(collectorId)?.apply {
+                    loadConfiguration(collectorNode.getNode("config"))
+                }
+            }
+        } ?: EmptyProjectFilesCollector
         val info = value.getNode("info").getValue(TypeTokens.STRINGS_MAP) ?: return null
         val groups = value.getNode("groups").getList(TypeTokens.STRING).filterNot(String::isNullOrBlank)
 
-        return Project(id, name, groups.toSet(), info, files)
+        return Project(id, name, groups.toSet(), info, filesCollector)
     }
 
     override fun serialize(type: TypeToken<*>, obj: Project?, value: ConfigurationNode) {
@@ -68,9 +70,9 @@ class ProjectTypeSerializer : TypeSerializer<Project> {
 
         value.getNode("id").value = obj.id.toString()
         value.getNode("name").value = obj.name
-        value.getNode("files").value = obj.files.map { (name, path) ->
-            mapOf("name" to name, "path" to path.toAbsolutePath().toString())
-        }
+        val filesCollectorNode = value.getNode("filesCollector")
+        filesCollectorNode.getNode("id").value = obj.filesCollector.id
+        obj.filesCollector.saveConfiguration(filesCollectorNode.getNode("config"))
         value.getNode("info").value = obj.info
         value.getNode("groups").value = obj.groups
     }

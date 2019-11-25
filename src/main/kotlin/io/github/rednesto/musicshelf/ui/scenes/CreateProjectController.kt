@@ -176,6 +176,7 @@ open class CreateProjectController @JvmOverloads constructor(
                 userData = collector
                 if (isEmptyInitialCollector && initialFilesCollector.id == collector.id) {
                     isSelected = true
+                    style = "-fx-font-weight: bold"
                 }
             }
         })

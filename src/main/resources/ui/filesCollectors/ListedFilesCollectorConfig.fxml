@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.rednesto.musicshelf.projectFilesCollectors.ListedProjectFilesCollector$ConfigController">
+   <Label fx:id="filesLabel" mnemonicParsing="true" text="%project.files_collectors.listed_files.files.label" VBox.vgrow="NEVER">
+      <VBox.margin>
+         <Insets bottom="2.0" left="5.0" top="5.0" />
+      </VBox.margin>
+   </Label>
+   <TableView fx:id="filesTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onKeyPressed="#filesTableView_onKeyPressed" VBox.vgrow="ALWAYS">
+      <columns>
+         <TableColumn fx:id="filesNameColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="75.0" text="%project.files_collectors.listed_files.table.header.name" />
+         <TableColumn fx:id="filesPathColumn" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="82.0" text="%project.files_collectors.listed_files.table.header.path" />
+      </columns>
+      <placeholder>
+         <Text text="%project.files_collectors.listed_files.table.placeholder" />
+      </placeholder>
+   </TableView>
+   <VBox spacing="5.0" VBox.vgrow="NEVER">
+      <VBox.margin>
+         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+      </VBox.margin>
+      <HBox spacing="10.0">
+         <Button onAction="#addFileButton_onAction" text="%project.files_collectors.listed_files.file.add" />
+         <Button onAction="#removeFileButton_onAction" text="%project.files_collectors.listed_files.file.remove" />
+      </HBox>
+   </VBox>
+</VBox>

@@ -2,12 +2,15 @@ package io.github.rednesto.musicshelf.projectFilesCollectors
 
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ProjectFilesCollector
+import io.github.rednesto.musicshelf.utils.configureFxmlLoader
 import io.github.rednesto.musicshelf.utils.getItemNameForPath
+import javafx.fxml.FXML
+import javafx.fxml.Initializable
 import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
-import javafx.scene.layout.VBox
 import ninja.leaping.configurate.ConfigurationNode
+import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -17,8 +20,14 @@ import java.util.stream.Collectors
 
 class DirectoryProjectFilesCollector : ProjectFilesCollector {
 
-    private val directoryPathField: TextField = TextField()
-    private val filterField: TextField = TextField()
+    private val configNode: Node
+    private val configController: ConfigController
+
+    init {
+        val fxmlLoader = configureFxmlLoader("/ui/filesCollectors/DirectoryCollectorConfig.fxml", resources = MusicShelfBundle.getBundle())
+        configNode = fxmlLoader.load()
+        configController = fxmlLoader.getController()!!
+    }
 
     override val id: String = "directory_content"
 
@@ -26,23 +35,17 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
             MusicShelfBundle.get("project.files_collectors.directory_based")
 
     override fun createConfigurationNode(): Node {
-        val directoryPathLabel = Label(MusicShelfBundle.get("project.files_collectors.directory_based.directory"))
-        directoryPathLabel.labelFor = filterField
-        directoryPathField.text = directoryPath?.toString()
-
-        val filterLabel = Label(MusicShelfBundle.get("project.files_collectors.directory_based.filter"))
-        filterLabel.labelFor = filterField
-        filterField.text = fileFilter
-
-        return VBox(directoryPathLabel, directoryPathField, filterLabel, filterField).apply { spacing = 5.0 }
+        configController.directoryPathField.text = directoryPath?.toString()
+        configController.filterField.text = fileFilter
+        return configNode
     }
 
     private var directoryPath: Path? = null
     private var fileFilter: String? = null
 
     override fun applyConfiguration() {
-        directoryPath = Paths.get(directoryPathField.text)
-        fileFilter = filterField.text
+        directoryPath = Paths.get(configController.directoryPathField.text)
+        fileFilter = configController.filterField.text
     }
 
     override fun loadConfiguration(configurationNode: ConfigurationNode) {
@@ -68,6 +71,23 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
             stream.filter { path ->
                 Files.isRegularFile(path) && (compiledFilter == null || path.fileName.toString().matches(compiledFilter))
             }.collect(Collectors.toUnmodifiableMap<Path, String, Path>(keyExtractor, Function.identity()))
+        }
+    }
+
+    class ConfigController : Initializable {
+        @FXML
+        lateinit var directoryPathLabel: Label
+        @FXML
+        lateinit var directoryPathField: TextField
+
+        @FXML
+        lateinit var filterLabel: Label
+        @FXML
+        lateinit var filterField: TextField
+
+        override fun initialize(location: URL?, resources: ResourceBundle?) {
+            directoryPathLabel.labelFor = filterField
+            filterLabel.labelFor = filterField
         }
     }
 }

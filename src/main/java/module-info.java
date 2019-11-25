@@ -21,6 +21,7 @@ module musicshelf {
     requires org.jetbrains.annotations;
 
     exports io.github.rednesto.musicshelf;
+    exports io.github.rednesto.musicshelf.projectFilesCollectors;
     exports io.github.rednesto.musicshelf.ui;
     exports io.github.rednesto.musicshelf.ui.scenes;
 

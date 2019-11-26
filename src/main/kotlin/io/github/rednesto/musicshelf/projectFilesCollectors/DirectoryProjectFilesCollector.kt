@@ -61,6 +61,14 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
         configurationNode.getNode("filter").value = fileFilter
     }
 
+    override fun transferConfigurationTo(other: ProjectFilesCollector): Boolean {
+        return if (other is DirectoryProjectFilesCollector) {
+            other.directoryPath = this.directoryPath
+            other.fileFilter = this.fileFilter
+            true
+        } else false
+    }
+
     override fun collect(): Map<String, Path> {
         val dir = directoryPath
         if (dir == null || !Files.isDirectory(dir)) {

@@ -67,6 +67,13 @@ class ListedProjectFilesCollector : ProjectFilesCollector {
         }
     }
 
+    override fun transferConfigurationTo(other: ProjectFilesCollector): Boolean {
+        return if (other is ListedProjectFilesCollector) {
+            other.files = this.files
+            true
+        } else false
+    }
+
     override fun collect(): Map<String, Path> = files ?: emptyMap()
 
     class ConfigController : Initializable {

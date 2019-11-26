@@ -58,6 +58,14 @@ interface ProjectFilesCollector {
     fun saveConfiguration(configurationNode: ConfigurationNode)
 
     /**
+     * Transfers this collector's configuration to the [other] one.
+     *
+     * @return `true` if the transfer was successful, `false` if the transfer
+     * could not be done or is not supported
+     */
+    fun transferConfigurationTo(other: ProjectFilesCollector): Boolean = false
+
+    /**
      * Collects all the files based on this collector's strategy, and optionally
      * its configuration.
      */

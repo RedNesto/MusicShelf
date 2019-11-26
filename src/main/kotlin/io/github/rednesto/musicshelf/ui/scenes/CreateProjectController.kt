@@ -2,20 +2,22 @@ package io.github.rednesto.musicshelf.ui.scenes;
 
 import io.github.rednesto.musicshelf.*
 import io.github.rednesto.musicshelf.projectFilesCollectors.EmptyProjectFilesCollector
+import io.github.rednesto.musicshelf.ui.ProjectFilesTableViewHelper
 import io.github.rednesto.musicshelf.ui.ShelvableGroupsListViewHelper
 import io.github.rednesto.musicshelf.ui.ShelvableInfoTableViewHelper
-import io.github.rednesto.musicshelf.utils.isRootGroup
-import io.github.rednesto.musicshelf.utils.normalizeGroups
-import io.github.rednesto.musicshelf.utils.renameToAvoidDuplicates
+import io.github.rednesto.musicshelf.utils.*
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.geometry.Pos
+import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.VBox
+import javafx.stage.Stage
 import java.net.URL
+import java.nio.file.Path
 import java.util.*
 
 open class CreateProjectController @JvmOverloads constructor(
@@ -103,6 +105,51 @@ open class CreateProjectController @JvmOverloads constructor(
     lateinit var filesCollectorsVBox: VBox
 
     @FXML
+    lateinit var filesPreviewButton: Button
+
+    val filesPreviewTableView: TableView<Pair<String, Path>> by lazy {
+        TableView<Pair<String, Path>>().apply {
+            val nameColumn = TableColumn<Pair<String, Path>, String>(MusicShelfBundle.get("project.files_collectors.listed_files.table.header.name"))
+            val pathColumn = TableColumn<Pair<String, Path>, Path>(MusicShelfBundle.get("project.files_collectors.listed_files.table.header.path"))
+            columns.addAll(nameColumn, pathColumn)
+            ProjectFilesTableViewHelper.configure(this, nameColumn, pathColumn)
+        }
+    }
+    val filesPreviewWindow: Stage by lazy {
+        Stage().apply {
+            title = MusicShelfBundle.get("create.project.files_collectors.preview.title")
+            scene = Scene(filesPreviewTableView)
+            initOwner(filesPreviewButton.scene.window)
+            setOnHidden {
+                filesPreviewButton.text = MusicShelfBundle.get("create.project.files_collectors.preview.show")
+            }
+        }
+    }
+
+    fun refreshFilesPreview() {
+        filesPreviewTableView.items.clear()
+        selectedFilesCollector?.let {
+            it.applyConfiguration()
+            filesPreviewTableView.items.addAll(it.collect().toList())
+        }
+    }
+
+    @FXML
+    fun filesPreviewButton_onAction(@Suppress("UNUSED_PARAMETER") event: ActionEvent) {
+        refreshFilesPreview()
+        if (!filesPreviewWindow.isShowing) {
+            filesPreviewWindow.show()
+
+            // We show the window before resizing columns because we need the
+            // TableView's skin, which is initialized the first time it is shown
+            tryResizeColumnsToContent(filesPreviewTableView)
+            filesPreviewWindow.width = getWidthOfAllColumns(filesPreviewTableView) + 35.0
+
+            filesPreviewButton.text = MusicShelfBundle.get("create.project.files_collectors.preview.update")
+        }
+    }
+
+    @FXML
     lateinit var filesCollectorConfigPane: VBox
 
     @FXML
@@ -127,7 +174,7 @@ open class CreateProjectController @JvmOverloads constructor(
             groups.add("/")
         }
 
-        val filesCollector = filesCollectorsToggleGroup.selectedToggle.userData
+        val filesCollector = filesCollectorsToggleGroup.selectedToggle?.userData
                 as? ProjectFilesCollector ?: EmptyProjectFilesCollector
         filesCollector.applyConfiguration()
 
@@ -157,6 +204,7 @@ open class CreateProjectController @JvmOverloads constructor(
             val collector = newValue.userData as? ProjectFilesCollector ?: return@addListener
             filesCollectorConfigPane.alignment = Pos.TOP_CENTER
             filesCollectorConfigPane.children[0] = collector.createConfigurationNode()
+            selectedFilesCollector = collector
         }
 
         val mutableFilesCollectors = ProjectFilesCollectorsLoader.createAllCollectors()
@@ -164,17 +212,22 @@ open class CreateProjectController @JvmOverloads constructor(
         availableFilesCollectors = mutableFilesCollectors
 
         val isEmptyInitialCollector = initialFilesCollector !is EmptyProjectFilesCollector
-        if (isEmptyInitialCollector) {
-            mutableFilesCollectors[initialFilesCollector.id] = initialFilesCollector
-            selectedFilesCollector = initialFilesCollector
-        }
-
         val localeToUse = resources?.let(ResourceBundle::getLocale) ?: Locale.getDefault()
-        filesCollectorsVBox.children.addAll(availableFilesCollectors.values.map { collector ->
+        filesCollectorsVBox.children.addAll(1, availableFilesCollectors.values.map { collector ->
             RadioButton(collector.getDisplayname(localeToUse)).apply {
                 toggleGroup = filesCollectorsToggleGroup
                 userData = collector
                 if (isEmptyInitialCollector && initialFilesCollector.id == collector.id) {
+                    try {
+                        initialFilesCollector.transferConfigWithFallback(collector)
+                    } catch (e: Throwable) {
+                        println("Failed to transfer configuration from $initialFilesCollector to $collector")
+                        println(e)
+                    }
+
+                    mutableFilesCollectors[collector.id] = collector
+                    selectedFilesCollector = collector
+
                     isSelected = true
                     style = "-fx-font-weight: bold"
                 }

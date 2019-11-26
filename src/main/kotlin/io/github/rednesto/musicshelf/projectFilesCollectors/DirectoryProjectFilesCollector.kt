@@ -47,7 +47,7 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
     private var fileFilter: String? = null
 
     override fun applyConfiguration() {
-        directoryPath = Paths.get(configController.directoryPathField.text)
+        directoryPath = configController.directoryPathField.text?.let { if (it.isBlank()) null else Paths.get(it) }
         fileFilter = configController.filterField.text?.ifBlank { null }
     }
 

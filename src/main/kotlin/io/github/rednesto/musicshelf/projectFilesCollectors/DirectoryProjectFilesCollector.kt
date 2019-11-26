@@ -48,12 +48,12 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
 
     override fun applyConfiguration() {
         directoryPath = Paths.get(configController.directoryPathField.text)
-        fileFilter = configController.filterField.text
+        fileFilter = configController.filterField.text?.ifBlank { null }
     }
 
     override fun loadConfiguration(configurationNode: ConfigurationNode) {
         directoryPath = configurationNode.getNode("directory").string?.let { Paths.get(it) }
-        fileFilter = configurationNode.getNode("filter").string
+        fileFilter = configurationNode.getNode("filter").string?.ifBlank { null }
     }
 
     override fun saveConfiguration(configurationNode: ConfigurationNode) {

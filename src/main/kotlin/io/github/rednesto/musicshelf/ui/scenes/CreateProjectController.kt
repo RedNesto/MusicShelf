@@ -1,4 +1,4 @@
-package io.github.rednesto.musicshelf.ui.scenes;
+package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.*
 import io.github.rednesto.musicshelf.projectFilesCollectors.EmptyProjectFilesCollector

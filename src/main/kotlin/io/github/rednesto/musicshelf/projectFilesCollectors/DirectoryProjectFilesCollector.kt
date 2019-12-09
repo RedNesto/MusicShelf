@@ -3,6 +3,7 @@ package io.github.rednesto.musicshelf.projectFilesCollectors
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.ProjectFilesCollector
 import io.github.rednesto.musicshelf.utils.configureFxmlLoader
+import io.github.rednesto.musicshelf.utils.getExtensionForPath
 import io.github.rednesto.musicshelf.utils.getItemNameForPath
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -18,8 +19,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
-import java.util.function.Function
-import java.util.stream.Collectors
 
 class DirectoryProjectFilesCollector : ProjectFilesCollector {
 
@@ -77,12 +76,31 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
 
         val compiledFilter = fileFilter?.toRegex()
 
-        val keyExtractor = Function { file: Path -> getItemNameForPath(file) }
-        return Files.list(dir).use { stream ->
-            stream.filter { path ->
-                Files.isRegularFile(path) && (compiledFilter == null || path.fileName.toString().matches(compiledFilter))
-            }.collect(Collectors.toUnmodifiableMap<Path, String, Path>(keyExtractor, Function.identity()))
+        val conflictingBaseNames = mutableSetOf<String>()
+        val mappedFiles = mutableMapOf<String, Path>()
+        Files.list(dir).use { stream ->
+            stream.forEach { path ->
+                if (!Files.isRegularFile(path) || (compiledFilter != null && path.fileName.toString().matches(compiledFilter))) {
+                    return@forEach
+                }
+
+                val suggestedName = getItemNameForPath(path)
+
+                // We do not want duplicate names, so if there are files
+                // with the same suggested name then we add the file
+                // extension between parenthesis to have unique names
+                // for the returned map.
+                val existingMappedFile = mappedFiles.remove(suggestedName)?.also { conflictingBaseNames.add(suggestedName) }
+
+                val mappedName = if (suggestedName in conflictingBaseNames) "$suggestedName (${getExtensionForPath(path)})" else suggestedName
+                mappedFiles[mappedName] = path
+                if (existingMappedFile != null) {
+                    mappedFiles["$suggestedName (${getExtensionForPath(existingMappedFile)})"] = existingMappedFile
+                }
+            }
         }
+
+        return mappedFiles
     }
 
     class ConfigController : Initializable {

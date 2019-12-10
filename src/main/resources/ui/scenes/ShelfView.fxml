@@ -30,6 +30,7 @@
   <Hyperlink fx:id="emptyShelfPlaceholderHyperlink" onAction="#addShelfItemButton_onAction" text="%shelf.placeholder" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
   <ButtonBar maxWidth="1.7976931348623157E308" GridPane.rowIndex="2">
     <buttons>
+      <Button fx:id="settingsButton" mnemonicParsing="false" onAction="#settingsButton_onAction" text="%shelf.settings" />
       <Button fx:id="removeShelfItemButton" mnemonicParsing="false" onAction="#removeShelfItemButton_onAction" text="%shelf.item.remove" />
       <SplitMenuButton fx:id="addShelfItemButton" mnemonicParsing="false" onAction="#addShelfItemButton_onAction" text="%shelf.item.add">
         <items>

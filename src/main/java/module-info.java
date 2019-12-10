@@ -1,4 +1,5 @@
 import io.github.rednesto.musicshelf.ProjectFilesCollector;
+import io.github.rednesto.musicshelf.appSupport.FileAppSupport;
 
 module musicshelf {
     requires kotlin.stdlib;
@@ -14,6 +15,7 @@ module musicshelf {
     requires javafx.fxml;
 
     requires configurate.core;
+    requires configurate.hocon;
     requires configurate.xml;
 
     requires guava;
@@ -30,4 +32,11 @@ module musicshelf {
     provides ProjectFilesCollector with
             io.github.rednesto.musicshelf.projectFilesCollectors.ListedProjectFilesCollector,
             io.github.rednesto.musicshelf.projectFilesCollectors.DirectoryProjectFilesCollector;
+
+    uses FileAppSupport;
+
+    provides FileAppSupport with
+            io.github.rednesto.musicshelf.appSupport.builtin.AcrobatReaderAppSupport,
+            io.github.rednesto.musicshelf.appSupport.builtin.Musescore2AppSupport,
+            io.github.rednesto.musicshelf.appSupport.builtin.Musescore3AppSupport;
 }

@@ -2,6 +2,8 @@ package io.github.rednesto.musicshelf.ui.scenes
 
 import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.Project
+import io.github.rednesto.musicshelf.appSupport.AppSupportManager
+import io.github.rednesto.musicshelf.appSupport.FileAppSupport
 import io.github.rednesto.musicshelf.utils.DesktopHelper
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -69,6 +71,8 @@ class ProjectDetailsController(val project: Project) : Initializable {
 
     private inner class FileListCell : ListCell<Pair<String, Path>>() {
 
+        private var appsContextMenuItems: List<MenuItem>
+
         init {
             val open = MenuItem(MusicShelfBundle.get("project.details.file.open"))
             open.setOnAction { item?.second?.let(DesktopHelper::open) }
@@ -85,6 +89,16 @@ class ProjectDetailsController(val project: Project) : Initializable {
 
             contextMenu = ContextMenu(open, openAll)
 
+            appsContextMenuItems = AppSupportManager.fileApps.map { (_, support) ->
+                val text = MusicShelfBundle.get("project.file.open_with", support.getDisplayname(Locale.ROOT))
+                MenuItem(text).apply {
+                    setOnAction { item?.second?.let(support::open) }
+                    userData = support
+                    isVisible = false
+                }
+            }
+            contextMenu.items.addAll(appsContextMenuItems)
+
             if (DesktopHelper.supportsShow()) {
                 val show = MenuItem(MusicShelfBundle.get("project.details.file.show"))
                 show.setOnAction { item?.second?.let(DesktopHelper::show) }
@@ -98,6 +112,15 @@ class ProjectDetailsController(val project: Project) : Initializable {
                 graphic = null
             } else {
                 graphic = VBox(Text(item.first), Text(item.second.toAbsolutePath().toString()))
+                updateAppsMenuItems(item.second)
+            }
+        }
+
+        private fun updateAppsMenuItems(path: Path) {
+            appsContextMenuItems.forEach {
+                val sheetMusicEditorAppSupport = it.userData as? FileAppSupport
+                        ?: return@forEach
+                it.isVisible = sheetMusicEditorAppSupport.supports(path)
             }
         }
     }

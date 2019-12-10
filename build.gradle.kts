@@ -28,6 +28,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.2")
     implementation("org.jetbrains:annotations:17.0.0")
     implementation("org.spongepowered:configurate-xml:3.6")
+    implementation("org.spongepowered:configurate-hocon:3.6")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")

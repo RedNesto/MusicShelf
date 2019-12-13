@@ -69,7 +69,7 @@ class ProjectDetailsController(val project: Project) : Initializable {
         project.filesCollector.collect().toList().let(filesListView.items::addAll)
     }
 
-    private inner class FileListCell : ListCell<Pair<String, Path>>() {
+    class FileListCell : ListCell<Pair<String, Path>>() {
 
         private var appsContextMenuItems: List<MenuItem>
 
@@ -79,11 +79,11 @@ class ProjectDetailsController(val project: Project) : Initializable {
 
             val openAll = MenuItem(MusicShelfBundle.get("project.details.file.open_all"))
             openAll.setOnAction {
-                val selectedItems = this@ProjectDetailsController.filesListView.selectionModel.selectedItems
+                val selectedItems = listView.selectionModel.selectedItems
                 selectedItems.forEach { DesktopHelper.open(it.second) }
             }
             addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
-                val selectedItems = this@ProjectDetailsController.filesListView.selectionModel.selectedItems
+                val selectedItems = listView.selectionModel.selectedItems
                 openAll.isVisible = selectedItems.size > 1
             }
 

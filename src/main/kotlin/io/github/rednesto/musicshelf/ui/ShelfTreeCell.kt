@@ -26,7 +26,7 @@ import java.nio.file.Files
 class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
 
     val shelfItemController = ShelfItemController()
-    val shelfItemNode: Node =  loadFxml("/ui/ShelfItemCell.fxml", shelfItemController, MusicShelfBundle.getBundle())
+    val shelfItemNode: Node = loadFxml("/ui/ShelfItemCell.fxml", shelfItemController, MusicShelfBundle.getBundle())
 
     //val projectController = ShelfItemController()
     //val projectNode: Node =  loadFxml("/ui/ProjectCell.fxml", projectController, MusicShelfBundle.getBundle())
@@ -102,6 +102,8 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
     }
 
     private fun addProjectContextMenu(project: Project) {
+        val showFiles = MenuItem(MusicShelfBundle.get("shelf.project.show_files"))
+        showFiles.setOnAction { ProjectFilesViewDialog.showAndWait(project) }
         val edit = MenuItem(MusicShelfBundle.get("shelf.project.edit"))
         edit.setOnAction { EditProjectDialog.showAndUpdateShelf(project, shelf) }
         val showDetails = MenuItem(MusicShelfBundle.get("shelf.project.show_details"))
@@ -112,7 +114,7 @@ class ShelfTreeCell(val shelf: Shelf) : TreeCell<Any>() {
                 showAndWait()
             }
         }
-        val contextMenu = ContextMenu(edit, showDetails)
+        val contextMenu = ContextMenu(showFiles, edit, showDetails)
         setOnContextMenuRequested { contextMenu.show(this.scene.window, it.screenX, it.screenY) }
     }
 

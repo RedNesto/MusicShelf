@@ -88,6 +88,8 @@ class ShelfViewController(val shelf: Shelf) : Initializable {
             val selectedItem = shelfTreeView.selectionModel.selectedItem?.value
             if (selectedItem is ShelfItem) {
                 DesktopHelper.open(selectedItem.path)
+            } else if (selectedItem is Project) {
+                ProjectFilesViewDialog.showAndWait(selectedItem)
             }
         }
     }

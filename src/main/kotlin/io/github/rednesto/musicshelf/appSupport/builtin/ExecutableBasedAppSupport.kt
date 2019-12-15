@@ -6,9 +6,13 @@ import io.github.rednesto.musicshelf.MusicShelfBundle
 import io.github.rednesto.musicshelf.appSupport.FileAppSupport
 import javafx.geometry.Insets
 import javafx.scene.Node
+import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.stage.FileChooser
 import ninja.leaping.configurate.ConfigurationNode
 import java.nio.file.Files
 import java.nio.file.InvalidPathException
@@ -37,7 +41,16 @@ abstract class ExecutableBasedAppSupport : FileAppSupport, Configurable {
         TextField().apply { padding = Insets(5.0) }
     }
     private val configNode: VBox by lazy {
-        VBox(Label(MusicShelfBundle.get("app_support.executable_based.executable_path")), executablePathTextField)
+        HBox.setHgrow(executablePathTextField, Priority.ALWAYS)
+        val choosePathButton = Button(MusicShelfBundle.get("app_support.executable_based.choose_executable_path"))
+        choosePathButton.setOnAction {
+            val selectedFile = FileChooser().apply {
+                title = MusicShelfBundle.get("app_support.executable_based.choose_executable_path.title")
+            }.showOpenDialog(choosePathButton.scene.window) ?: return@setOnAction
+            executablePathTextField.text = selectedFile.toPath().toAbsolutePath().toString()
+        }
+        val inputBox = HBox(5.0, executablePathTextField, choosePathButton)
+        VBox(Label(MusicShelfBundle.get("app_support.executable_based.executable_path")), inputBox)
     }
 
     override fun createConfigurationNode(): Node {

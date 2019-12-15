@@ -19,7 +19,22 @@ class MusicShelfApp : Application() {
 
         // TODO support multiple shelves
         val mainShelfPath = Paths.get("").toAbsolutePath()
-        mainShelf = Shelf("Main Shelf", mainShelfPath).apply(Shelf::load)
+        mainShelf = Shelf("Main Shelf", mainShelfPath).apply {
+            load()
+            this.addItemChangeListener(object : Shelf.SimpleChangeListener<ShelfItem> {
+                override fun onItemChange(oldItem: ShelfItem?, newItem: ShelfItem?) {
+                    ShelfItemInfoIndex.clear()
+                    ShelfItemInfoIndex.indexShelf(this@apply)
+                }
+            })
+            this.addProjectChangeListener(object : Shelf.SimpleChangeListener<Project> {
+                override fun onItemChange(oldItem: Project?, newItem: Project?) {
+                    ShelfItemInfoIndex.clear()
+                    ShelfItemInfoIndex.indexShelf(this@apply)
+                }
+            })
+            ShelfItemInfoIndex.indexShelf(this)
+        }
     }
 
     override fun start(primaryStage: Stage) {

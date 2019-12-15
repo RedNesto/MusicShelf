@@ -24,7 +24,7 @@ object CreateProjectDialog {
         return loader.getController<CreateProjectController>()?.result
     }
 
-    fun showAndUpdateShelf(shelf: Shelf, controller: CreateProjectController? = null) {
+    fun showAndUpdateShelf(shelf: Shelf, controller: CreateProjectController = CreateProjectController(shelf = shelf)) {
         showAndGet(controller)?.let(shelf::addProject)
     }
 }

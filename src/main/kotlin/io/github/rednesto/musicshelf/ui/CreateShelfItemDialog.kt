@@ -24,7 +24,7 @@ object CreateShelfItemDialog {
         return loader.getController<CreateShelfItemController>()?.result
     }
 
-    fun showAndUpdateShelf(shelf: Shelf, controller: CreateShelfItemController? = null) {
+    fun showAndUpdateShelf(shelf: Shelf, controller: CreateShelfItemController = CreateShelfItemController(shelf = shelf)) {
         showAndGet(controller)?.let(shelf::addItem)
     }
 }

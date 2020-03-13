@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.openjfx.gradle.JavaFXOptions
 
 plugins {
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.70"
 
     id("application")
     id("org.openjfx.javafxplugin") version "0.0.8"
@@ -10,7 +10,6 @@ plugins {
 }
 
 group = "io.github.rednesto"
-version = "1.0-SNAPSHOT"
 
 buildProperties.create("local") { using(file("local-gradle.properties")) }
 
@@ -24,14 +23,14 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.2")
-    implementation("org.jetbrains:annotations:17.0.0")
-    implementation("org.spongepowered:configurate-xml:3.6")
-    implementation("org.spongepowered:configurate-hocon:3.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.4")
+    implementation("org.jetbrains:annotations:19.0.0")
+    implementation("org.spongepowered:configurate-xml:3.6.1")
+    implementation("org.spongepowered:configurate-hocon:3.6.1")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 }
 
 tasks.withType<KotlinCompile> {

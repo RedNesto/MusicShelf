@@ -4,8 +4,8 @@ import org.openjfx.gradle.JavaFXOptions
 plugins {
     kotlin("jvm") version "1.3.50"
 
+    id("application")
     id("org.openjfx.javafxplugin") version "0.0.8"
-    id("org.beryx.jlink") version "2.16.1"
     id("com.novoda.build-properties") version "0.4.1"
 }
 
@@ -46,16 +46,4 @@ configure<JavaFXOptions> {
     version = "13"
 
     modules = listOf("javafx.controls", "javafx.fxml")
-}
-
-jlink {
-    addOptions("--strip-debug", "--no-header-files", "--no-man-pages")
-    imageName.set("MusicShelf")
-    launcher {
-        name = "MusicShelf"
-    }
-    jpackage {
-        jvmArgs.clear()
-        installerOptions = listOf("--win-per-user-install", "--win-menu", "--win-shortcut")
-    }
 }

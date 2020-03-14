@@ -46,3 +46,10 @@ configure<JavaFXOptions> {
 
     modules = listOf("javafx.controls", "javafx.fxml")
 }
+
+tasks.test {
+    useJUnitPlatform()
+    // I couldn't get a module to work for the test sourceSets
+    jvmArgs("--add-exports", "org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED",
+            "--add-exports", "org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED")
+}

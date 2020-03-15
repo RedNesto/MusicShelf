@@ -1,4 +1,4 @@
-# MusicShelf
+# MusicShelf ![Automated Tests](https://github.com/RedNesto/MusicShelf/workflows/Automated%20Tests/badge.svg?event=push)
 
 If like me, you have many sheet music spread across storage drives, you might want a way to gather them in one place,
  group them as you please, sort them by attributes (composer, origin, arranger)

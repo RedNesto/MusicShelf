@@ -2,9 +2,13 @@ package io.github.rednesto.musicshelf.appSupport
 
 import io.github.rednesto.musicshelf.Configurable
 import ninja.leaping.configurate.ConfigurationNode
+import ninja.leaping.configurate.SimpleConfigurationNode
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
+import java.lang.module.ModuleFinder
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 object AppSupportManager {
@@ -14,18 +18,35 @@ object AppSupportManager {
     var fileApps: Map<String, FileAppSupport> = emptyMap()
         private set
 
-
     fun load(filePath: Path) {
-        val loader = HoconConfigurationLoader.builder().setPath(filePath).build()
-        val rootNode = loader.load()
+        val rootNode = if (Files.isRegularFile(filePath)) {
+            HoconConfigurationLoader.builder().setPath(filePath).build().load()
+        } else {
+            SimpleConfigurationNode.root()
+        }
         load(rootNode)
     }
 
     fun load(rootNode: ConfigurationNode) {
-        fileApps = loadAppSupports(ServiceLoader.load(FileAppSupport::class.java), rootNode.getNode("fileApps"))
+        fileApps = loadAppSupports(createLoader(), rootNode.getNode("fileApps"))
+    }
+
+    private fun createLoader(): ServiceLoader<FileAppSupport> {
+        val pluginsDir = Paths.get("plugins")
+        println("Plugin dir: ${pluginsDir.toAbsolutePath()}")
+        val finder = ModuleFinder.of(pluginsDir)
+        val allRoots = finder.findAll().mapTo(mutableSetOf()) { it.descriptor().name() }
+        val parent = ModuleLayer.boot().configuration().resolve(finder, ModuleFinder.of(), allRoots)
+        val moduleLayer = ModuleLayer.boot().defineModulesWithManyLoaders(parent, javaClass.classLoader)
+        return ServiceLoader.load(moduleLayer, FileAppSupport::class.java)
     }
 
     private fun <S : AppSupport> loadAppSupports(serviceLoader: ServiceLoader<S>, rootNode: ConfigurationNode): Map<String, S> {
+        serviceLoader.iterator().forEachRemaining {
+            println(it.javaClass.name)
+            println(it.javaClass.classLoader)
+            println(it.javaClass.classLoader.name)
+        }
         return serviceLoader
                 .onEach {
                     try {
@@ -35,8 +56,7 @@ object AppSupportManager {
                         println(t)
                     }
                 }
-                .map { it.id to it }
-                .toMap()
+                .associateBy { it.id }
     }
 
 

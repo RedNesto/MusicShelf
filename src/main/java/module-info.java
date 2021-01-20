@@ -27,6 +27,9 @@ module musicshelf {
     exports io.github.rednesto.musicshelf.ui;
     exports io.github.rednesto.musicshelf.ui.scenes;
 
+    exports io.github.rednesto.musicshelf.appSupport;
+    exports io.github.rednesto.musicshelf.appSupport.builtin;
+
     uses ProjectFilesCollector;
 
     provides ProjectFilesCollector with
@@ -36,7 +39,5 @@ module musicshelf {
     uses FileAppSupport;
 
     provides FileAppSupport with
-            io.github.rednesto.musicshelf.appSupport.builtin.AcrobatReaderAppSupport,
-            io.github.rednesto.musicshelf.appSupport.builtin.Musescore2AppSupport,
-            io.github.rednesto.musicshelf.appSupport.builtin.Musescore3AppSupport;
+            io.github.rednesto.musicshelf.appSupport.builtin.AcrobatReaderAppSupport;
 }

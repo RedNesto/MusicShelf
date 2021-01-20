@@ -4,7 +4,6 @@ import io.github.rednesto.musicshelf.appSupport.AppSupportManager
 import io.github.rednesto.musicshelf.ui.ShelfViewWindow
 import javafx.application.Application
 import javafx.stage.Stage
-import java.nio.file.Files
 import java.nio.file.Paths
 
 class MusicShelfApp : Application() {
@@ -12,10 +11,7 @@ class MusicShelfApp : Application() {
     override fun init() {
         app = this
 
-        val appSupportFile = Paths.get(AppSupportManager.DEFAULT_FILE_NAME)
-        if (Files.exists(appSupportFile)) {
-            AppSupportManager.load(appSupportFile)
-        }
+        AppSupportManager.load(Paths.get(AppSupportManager.DEFAULT_FILE_NAME))
 
         // TODO support multiple shelves
         val mainShelfPath = Paths.get("").toAbsolutePath()

@@ -4,6 +4,8 @@
 
 !/src/
 
+!/plugins/
+
 !/build.gradle.kts
 !/gradle.properties
 !/settings.gradle

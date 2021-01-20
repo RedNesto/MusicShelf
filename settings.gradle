@@ -8,4 +8,4 @@ pluginManagement {
 
 rootProject.name = 'MusicShelf'
 
-include 'plugins:musescore'
+include 'plugins:musescore', 'plugins:acrobatreader'

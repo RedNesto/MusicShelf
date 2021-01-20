@@ -37,7 +37,4 @@ module musicshelf {
             io.github.rednesto.musicshelf.projectFilesCollectors.DirectoryProjectFilesCollector;
 
     uses FileAppSupport;
-
-    provides FileAppSupport with
-            io.github.rednesto.musicshelf.appSupport.builtin.AcrobatReaderAppSupport;
 }

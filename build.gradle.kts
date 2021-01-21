@@ -7,6 +7,7 @@ plugins {
     id("application")
     id("org.openjfx.javafxplugin") version "0.0.9"
     id("com.novoda.build-properties") version "0.4.1"
+    id("org.beryx.jlink") version "2.23.2"
 }
 
 buildProperties.create("local") { using(file("local-gradle.properties")) }
@@ -41,7 +42,8 @@ allprojects {
 }
 
 application {
-    mainClass.set("musicshelf/io.github.rednesto.musicshelf.MusicShelfApp")
+    mainModule.set("musicshelf")
+    mainClass.set("io.github.rednesto.musicshelf.MusicShelfApp")
 }
 
 distributions.main {
@@ -68,6 +70,50 @@ tasks.test {
 
 val run by tasks.existing(JavaExec::class) {
     workingDir("run")
+}
+
+// Avoid having both jlink and jpackageImage configurations uncommented:
+// otherwise plugins are copied twice, in two different locations
+//tasks.jlink {
+//    doLast {
+//        copy {
+//            val pluginsDir = file(jlink.imageDir.get()).resolve(jlink.imageName.get()).resolve("bin").resolve("plugins")
+//            pluginProjects().forEach { plugin ->
+//                from(plugin.tasks["jar"])
+//                into(pluginsDir)
+//            }
+//        }
+//    }
+//}
+
+tasks.jpackageImage {
+    doLast {
+        copy {
+            val jpackageData = jlink.jpackageData.get()
+            val pluginsDir = file(jpackageData.imageOutputDir).resolve(jpackageData.imageName).resolve("plugins")
+            pluginProjects().forEach { plugin ->
+                from(plugin.tasks["jar"])
+                into(pluginsDir)
+            }
+        }
+    }
+}
+
+jlink {
+    options.addAll("--bind-services", "--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
+    addExtraDependencies("javafx")
+    launcher {
+        name = "MusicShelf"
+    }
+    mergedModule {
+        excludeUses("com.google.common.base.PatternCompiler")
+    }
+    jpackage {
+        resourceDir
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+            installerOptions.addAll(listOf("--win-per-user-install", "--win-dir-chooser", "--win-menu"))
+        }
+    }
 }
 
 pluginProjects().forEach { pluginProject ->

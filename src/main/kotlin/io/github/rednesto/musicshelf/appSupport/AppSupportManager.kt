@@ -1,10 +1,10 @@
 package io.github.rednesto.musicshelf.appSupport
 
 import io.github.rednesto.musicshelf.Configurable
-import ninja.leaping.configurate.ConfigurationNode
-import ninja.leaping.configurate.SimpleConfigurationNode
-import ninja.leaping.configurate.commented.CommentedConfigurationNode
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader
+import org.spongepowered.configurate.BasicConfigurationNode
+import org.spongepowered.configurate.CommentedConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader
 import java.lang.module.ModuleFinder
 import java.nio.file.Files
 import java.nio.file.Path
@@ -20,15 +20,15 @@ object AppSupportManager {
 
     fun load(filePath: Path) {
         val rootNode = if (Files.isRegularFile(filePath)) {
-            HoconConfigurationLoader.builder().setPath(filePath).build().load()
+            HoconConfigurationLoader.builder().path(filePath).build().load()
         } else {
-            SimpleConfigurationNode.root()
+            BasicConfigurationNode.root()
         }
         load(rootNode)
     }
 
     fun load(rootNode: ConfigurationNode) {
-        fileApps = loadAppSupports(createLoader(), rootNode.getNode("fileApps"))
+        fileApps = loadAppSupports(createLoader(), rootNode.node("fileApps"))
     }
 
     private fun createLoader(): ServiceLoader<FileAppSupport> {
@@ -50,7 +50,7 @@ object AppSupportManager {
         return serviceLoader
                 .onEach {
                     try {
-                        (it as? Configurable)?.loadConfiguration(rootNode.getNode(it.id))
+                        (it as? Configurable)?.loadConfiguration(rootNode.node(it.id))
                     } catch (t: Throwable) {
                         println("Could not load configuration of AppSupport ${it.id}")
                         println(t)
@@ -61,20 +61,20 @@ object AppSupportManager {
 
 
     fun save(filePath: Path) {
-        val loader = HoconConfigurationLoader.builder().setPath(filePath).build()
-        val rootNode = loader.createEmptyNode()
+        val loader = HoconConfigurationLoader.builder().path(filePath).build()
+        val rootNode = loader.createNode()
         save(rootNode)
         loader.save(rootNode)
     }
 
     private fun save(rootNode: CommentedConfigurationNode) {
-        saveAppSupports(fileApps, rootNode.getNode("fileApps"))
+        saveAppSupports(fileApps, rootNode.node("fileApps"))
     }
 
     private fun saveAppSupports(supports: Map<String, FileAppSupport>, sheetMusicEditorsNode: CommentedConfigurationNode) {
         supports.forEach {
             try {
-                (it.value as? Configurable)?.saveConfiguration(sheetMusicEditorsNode.getNode(it.key))
+                (it.value as? Configurable)?.saveConfiguration(sheetMusicEditorsNode.node(it.key))
             } catch (t: Throwable) {
                 println("Could not save configuration of AppSupport ${it.value.id}")
                 println(t)

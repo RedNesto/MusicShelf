@@ -17,7 +17,7 @@ import javafx.scene.control.TableView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.stage.FileChooser
-import ninja.leaping.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
 import java.net.URL
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -52,7 +52,7 @@ class ListedProjectFilesCollector : ProjectFilesCollector {
     }
 
     override fun loadConfiguration(configurationNode: ConfigurationNode) {
-        files = configurationNode.getList(TypeTokens.STRINGS_MAP).mapNotNull { map ->
+        files = configurationNode.getList(TypeTokens.STRINGS_MAP) { emptyList() }.mapNotNull { map ->
             val fileName = map["name"] ?: return@mapNotNull null
             val filePath = map["path"] ?: return@mapNotNull null
             fileName to Paths.get(filePath)
@@ -61,9 +61,9 @@ class ListedProjectFilesCollector : ProjectFilesCollector {
 
     override fun saveConfiguration(configurationNode: ConfigurationNode) {
         files?.let { it ->
-            configurationNode.value = it.map { (name, path) ->
+            configurationNode.set(it.map { (name, path) ->
                 mapOf("name" to name, "path" to path.toAbsolutePath().toString())
-            }
+            })
         }
     }
 

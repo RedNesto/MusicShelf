@@ -1,7 +1,7 @@
 package io.github.rednesto.musicshelf
 
 import javafx.scene.Node
-import ninja.leaping.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
 import java.nio.file.Path
 import java.util.*
 

@@ -13,7 +13,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
-import ninja.leaping.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
 import java.nio.file.Files
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
@@ -70,7 +70,7 @@ abstract class ExecutableBasedAppSupport : FileAppSupport, Configurable {
     }
 
     override fun loadConfiguration(configurationNode: ConfigurationNode) {
-        val executable = configurationNode.getNode("executable").string
+        val executable = configurationNode.node("executable").string
         if (executable == null) {
             executablePath = null
             return
@@ -97,6 +97,6 @@ abstract class ExecutableBasedAppSupport : FileAppSupport, Configurable {
     }
 
     override fun saveConfiguration(configurationNode: ConfigurationNode) {
-        configurationNode.getNode("executable").value = executablePath?.toString()
+        configurationNode.node("executable").set(executablePath?.toString())
     }
 }

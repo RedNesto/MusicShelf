@@ -3,7 +3,7 @@ package io.github.rednesto.musicshelf.projectFilesCollectors
 import io.github.rednesto.musicshelf.ProjectFilesCollector
 import javafx.scene.Node
 import javafx.scene.text.Text
-import ninja.leaping.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
 import java.nio.file.Path
 import java.util.*
 

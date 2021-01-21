@@ -1,7 +1,7 @@
 package io.github.rednesto.musicshelf
 
 import javafx.scene.Node
-import ninja.leaping.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
 
 /**
  * A general purpose interface used for any object that can be configured via the GUI.

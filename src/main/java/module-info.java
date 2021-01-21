@@ -6,7 +6,7 @@ module musicshelf {
     requires kotlin.stdlib.jdk7;
     requires kotlin.stdlib.jdk8;
 
-    requires kotlinx.coroutines.core;
+    requires kotlinx.coroutines.core.jvm;
     requires kotlinx.coroutines.javafx;
 
     requires java.desktop;
@@ -14,11 +14,11 @@ module musicshelf {
     requires javafx.controls;
     requires javafx.fxml;
 
-    requires configurate.core;
-    requires configurate.hocon;
-    requires configurate.xml;
+    requires org.spongepowered.configurate;
+    requires org.spongepowered.configurate.hocon;
+    requires org.spongepowered.configurate.xml;
 
-    requires guava;
+    requires geantyref;
 
     requires org.jetbrains.annotations;
 

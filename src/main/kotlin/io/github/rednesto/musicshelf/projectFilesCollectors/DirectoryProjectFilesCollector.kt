@@ -12,7 +12,7 @@ import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.stage.DirectoryChooser
-import ninja.leaping.configurate.ConfigurationNode
+import org.spongepowered.configurate.ConfigurationNode
 import java.io.File
 import java.net.URL
 import java.nio.file.Files
@@ -51,13 +51,13 @@ class DirectoryProjectFilesCollector : ProjectFilesCollector {
     }
 
     override fun loadConfiguration(configurationNode: ConfigurationNode) {
-        directoryPath = configurationNode.getNode("directory").string?.let { Paths.get(it) }
-        fileFilter = configurationNode.getNode("filter").string?.ifBlank { null }
+        directoryPath = configurationNode.node("directory").string?.let { Paths.get(it) }
+        fileFilter = configurationNode.node("filter").string?.ifBlank { null }
     }
 
     override fun saveConfiguration(configurationNode: ConfigurationNode) {
-        configurationNode.getNode("directory").value = directoryPath.toString()
-        configurationNode.getNode("filter").value = fileFilter
+        configurationNode.node("directory").set(directoryPath.toString())
+        configurationNode.node("filter").set(fileFilter)
     }
 
     override fun transferConfigurationTo(other: ProjectFilesCollector): Boolean {

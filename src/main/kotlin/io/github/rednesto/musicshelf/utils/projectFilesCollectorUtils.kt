@@ -1,11 +1,11 @@
 package io.github.rednesto.musicshelf.utils
 
 import io.github.rednesto.musicshelf.ProjectFilesCollector
-import ninja.leaping.configurate.SimpleConfigurationNode
+import org.spongepowered.configurate.BasicConfigurationNode
 
 fun ProjectFilesCollector.transferConfigWithFallback(other: ProjectFilesCollector) {
     if (!transferConfigurationTo(other)) {
-        val initialCollectorConfig = SimpleConfigurationNode.root()
+        val initialCollectorConfig = BasicConfigurationNode.root()
         this.saveConfiguration(initialCollectorConfig)
         other.loadConfiguration(initialCollectorConfig)
     }
